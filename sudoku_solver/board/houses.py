@@ -81,9 +81,9 @@ class House:
             cells = [c for c in all_cells if candidate in c.possible_values]
         return cells
 
-    def get_cells_having_any_of_candidates(self, candidate_values: Sequence[int]):
+    def get_cells_having_any_of_candidates(self, candidates: Sequence[int]):
         all_cells = self.get_cells(only_unsolved=True)
-        cells = [c for c in all_cells if not set(candidate_values).isdisjoint(c.possible_values)]
+        cells = [c for c in all_cells if not set(candidates).isdisjoint(c.possible_values)]
         return cells
 
     def get_cells_having_each_of_candidates(self, candidate_values: Sequence[int]):

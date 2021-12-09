@@ -106,3 +106,5 @@ def find_xy_chain(board: Board):
             if xy_chain:
                 board.notify_preview(preview=xy_chain)
                 return
+
+

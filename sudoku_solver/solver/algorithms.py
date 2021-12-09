@@ -1,3 +1,4 @@
+from sudoku_solver.solver.remote_pair import find_remote_pair
 from sudoku_solver.board.board import Board
 from sudoku_solver.solver.chains import find_xy_chain, find_x_chain
 from sudoku_solver.solver.fish import find_n_fish
@@ -99,3 +100,13 @@ def get_algo_apply_xy_chain(board: Board):
         find_xy_chain(board=board)
         board.validate_consistency_in_all_houses()
     return identify_xy_chain
+
+
+def get_algo_remote_pair(board: Board):
+    """find remote-pair algorithm (similar to x-chain
+    and xy-chain"""
+    def identify_remote_pair():
+        get_algo_invalidate_solved_values(board=board)()
+        find_remote_pair(board=board)
+        board.validate_consistency_in_all_houses()
+    return identify_remote_pair

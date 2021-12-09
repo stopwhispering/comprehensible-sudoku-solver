@@ -139,7 +139,9 @@ class SudokuUI(tkinter.Frame):
     def _draw_preview_indications(self, indicated_positions: Tuple[Tuple[int, int, int, Optional[IndicatorLevel]]]):
         for position in indicated_positions:
             # todo: central mapping from level to color
-            if len(position) < 4 or position[3] == IndicatorLevel.DEFAULT:
+            if len(position) < 4:
+                color = COLOR.GREEN
+            elif position[3] == IndicatorLevel.DEFAULT:
                 color = COLOR.GREEN
             elif position[3] == IndicatorLevel.FIRST:
                 color = COLOR.BLUE

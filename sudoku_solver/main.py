@@ -1,3 +1,4 @@
+from solver.algorithms import get_algo_remote_pair
 from sudoku_solver.solver.algorithms import (get_algo_hidden_subset,
                                              get_algo_naked_subset,
                                              get_algo_find_single_candidates, get_algo_invalidate_solved_values,
@@ -45,6 +46,8 @@ if __name__ == '__main__':
                             handler=get_algo_apply_x_chain(board))
     sudoku_ui.add_algorithm(text="XY-Chain",
                             handler=get_algo_apply_xy_chain(board))
+    sudoku_ui.add_algorithm(text="Remote Pair",
+                            handler=get_algo_remote_pair(board))
 
     # stats = Stats(board)
     # print(f'Original Board')

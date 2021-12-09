@@ -53,20 +53,31 @@ class Board(SudokuObservable):
             series[x] = column.as_series(mode=mode)
         return pd.DataFrame(data=series).sort_index(ascending=False)
 
-    def _get_all_cells(self) -> List[Cell]:
+    def _get_all_cells(self, only_unsolved: bool = False) -> List[Cell]:
         """get list of all cells"""
         cells = [c for block in self.blocks.values() for c in block.get_cells()]
-        return cells
+        if not only_unsolved:
+            return cells
+        else:
+            unsolved_cells = [c for c in cells if not c.is_solved()]
+            return unsolved_cells
 
     def get_cells_by_candidate(self, candidate: int, n_candidates: int = None):
         """return all cells that have certain candidate;
-        optionally filter on cells that have exactly n total candidates"""
+        optionally filter on cells that have exactly n candidates left"""
         all_cells = self._get_all_cells()
         cells = [c for c in all_cells if c.is_value_candidate(candidate)]
         if not n_candidates:
             return cells
         else:
             return [c for c in cells if len(c.possible_values) == n_candidates]
+
+    def get_cells_by_number_of_candidates(self, n_candidates: int):
+        """return all cells that have exactly n candidates left"""
+        assert 1 < n_candidates <= 9
+        unsolved_cells = self._get_all_cells(only_unsolved=True)
+        cells = [c for c in unsolved_cells if len(c.possible_values) == n_candidates]
+        return cells
 
     def get_count_remaining_candidates(self):
         all_cells = self._get_all_cells()

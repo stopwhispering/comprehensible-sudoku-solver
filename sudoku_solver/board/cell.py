@@ -1,5 +1,5 @@
 from __future__ import annotations
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Sequence
 
 from typing import Optional, List, Iterable, Set
 
@@ -92,6 +92,22 @@ class Cell(SudokuObservable):
                        self.block.get_cells_having_candidate(candidate=candidate))
         seen_by = [c for c in seen_by_raw if c is not self]
         return set(seen_by)
+
+    def seen_by_any_of_candidates(self, candidates: Sequence[int]) -> Set[Cell]:
+        """return all other cells seeing this cell which have any (i.e. one or more) of the supplied candidates;
+        consider all houses (row, column,block"""
+        seen_by_raw = (self.column.get_cells_having_any_of_candidates(candidates=candidates) +
+                       self.row.get_cells_having_any_of_candidates(candidates=candidates) +
+                       self.block.get_cells_having_any_of_candidates(candidates=candidates))
+        seen_by = [c for c in seen_by_raw if c is not self]
+        return set(seen_by)
+
+    def is_seen_by_cell(self, other_cell: Cell):
+        """returns True if in same house; doesn't consider candidate"""
+        if self.row is other_cell.row or self.column is other_cell.column or self.block is other_cell.block:
+            return True
+        else:
+            return False
 
     def set_row(self, row: Row):
         self.row = row
