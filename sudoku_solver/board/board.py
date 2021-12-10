@@ -62,15 +62,26 @@ class Board(SudokuObservable):
             unsolved_cells = [c for c in cells if not c.is_solved()]
             return unsolved_cells
 
-    def get_cells_by_candidate(self, candidate: int, n_candidates: int = None):
+    def get_cells_by_candidate(self, candidate: int,
+                               n_candidates: int = None,
+                               except_cells: Sequence[Cell] = None):
         """return all cells that have certain candidate;
-        optionally filter on cells that have exactly n candidates left"""
-        all_cells = self._get_all_cells()
+        optionally filter on cells that have exactly n candidates left
+        optionally exclude supplied cells"""
+        all_cells = self._get_all_cells(only_unsolved=True)
         cells = [c for c in all_cells if c.is_value_candidate(candidate)]
+        if except_cells:
+            cells = [c for c in cells if c not in except_cells]
         if not n_candidates:
             return cells
         else:
             return [c for c in cells if len(c.possible_values) == n_candidates]
+
+    def get_cells_by_candidates(self, candidates: Sequence[int]):
+        """return all cells that have exactly supplied candidates"""
+        all_cells = self._get_all_cells(only_unsolved=True)
+        cells = [c for c in all_cells if c.has_exactly_candidates(candidates=candidates)]
+        return cells
 
     def get_cells_by_number_of_candidates(self, n_candidates: int):
         """return all cells that have exactly n candidates left"""
@@ -137,4 +148,51 @@ class Board(SudokuObservable):
     def get_cells_seeing_all_supplied_cells(candidate: int, cells: Sequence[Cell]) -> Set[Cell]:
         cells_seeing = [cell.seen_by(candidate=candidate) for cell in cells]
         cells_seeing_each = set.intersection(*cells_seeing)
-        return cells_seeing_each
+        return set([cell for cell in cells_seeing_each if cell not in cells])
+
+    @staticmethod
+    def are_cell_sets_seeing_each_other(candidate: int, cells_a: Sequence[Cell], cells_b: Sequence[Cell]) -> bool:
+        """returns true if each cell of cells_a sees each cell of cells_b (and the other way around)"""
+        for cell in cells_a:
+            cells_seen = cell.seen_by(candidate=candidate)
+            if not cells_seen.issuperset(cells_b):
+                return False
+        return True
+
+    @staticmethod
+    def get_houses_shared_by_cells(cells: Sequence[Cell]):
+        rows = [c.row for c in cells]
+        cols = [c.column for c in cells]
+        blocks = [c.block for c in cells]
+        shared = []
+        if len(set(rows)) == 1:
+            shared.append(rows[0])
+        if len(set(cols)) == 1:
+            shared.append(cols[0])
+        if len(set(blocks)) == 1:
+            shared.append(blocks[0])
+        return shared
+
+    @staticmethod
+    def are_cells_in_same_house(cells: Sequence[Cell]):
+        """returns true if all cells in sequence share a single house (either all in same row, all in same col,
+        or all in same block"""
+        rows = set([cell.row for cell in cells])
+        cols = set([cell.column for cell in cells])
+        blocks = set([cell.block for cell in cells])
+        return len(rows) == 1 or len(cols) == 1 or len(blocks) == 1
+
+    @staticmethod
+    def get_common_houses(cells: Sequence[Cell]) -> List[House]:
+        """check if supplied cells share one (or many) single house; return them"""
+        rows = set([cell.row for cell in cells])
+        cols = set([cell.column for cell in cells])
+        blocks = set([cell.block for cell in cells])
+        shared_houses = []
+        if len(rows) == 1:
+            shared_houses.append(rows.pop())
+        if len(cols) == 1:
+            shared_houses.append(cols.pop())
+        if len(blocks) == 1:
+            shared_houses.append(blocks.pop())
+        return shared_houses

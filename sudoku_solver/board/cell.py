@@ -38,6 +38,9 @@ class Cell(SudokuObservable):
     def is_value_candidate(self, value: int):
         return value in self.possible_values
 
+    def has_exactly_candidates(self, candidates: Sequence[int]):
+        return set(candidates) == set(self.possible_values)
+
     def set_solved_value_to(self, value: int):
         """remove all candidates but value from list of possible candidates;
         must be unsolved before"""

@@ -72,6 +72,10 @@ class House:
         else:
             return list(self.cells.values())
 
+    def get_count_of_cells_having_candidate(self, candidate: int):
+        all_cells = self.get_cells(only_unsolved=True)
+        return len([c for c in all_cells if c.is_value_candidate(candidate)])
+
     def get_cells_having_candidate(self, candidate: int,
                                    n_candidates: int = None,
                                    except_cells: Sequence[Cell] = None) -> List[Cell]:

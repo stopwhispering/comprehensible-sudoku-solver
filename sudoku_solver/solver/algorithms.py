@@ -1,3 +1,5 @@
+from sudoku_solver.solver.almost_locked_sets import find_singly_or_doubly_linked_als
+from sudoku_solver.solver.nice_loop import find_discontinuous_nice_loop
 from sudoku_solver.solver.two_string_kite import find_two_string_kite
 from sudoku_solver.solver.remote_pair import find_remote_pair
 from sudoku_solver.board.board import Board
@@ -7,14 +9,15 @@ from sudoku_solver.solver.hidden_subset import find_hidden_subset
 from sudoku_solver.solver.naked_subset import find_naked_subset
 from sudoku_solver.solver.locked_candidate import find_locked_candidate
 from sudoku_solver.solver.skyscraper import find_skyscraper
+from sudoku_solver.solver.w_wing import find_w_wing
 from sudoku_solver.solver.xy_z_wing import find_xy_wing, find_xyz_wing
 
+# todo decorate instead of reapeating....
 
 def get_algo_invalidate_solved_values(board: Board):
     """
     simple invalidator: iterate through rows, cols, packages and invalidate yet-solved values
     """
-
     def invalidate_solved_values():
         for unit in board.get_all_houses():
             unit.invalidate_solved_values()
@@ -120,6 +123,15 @@ def get_algo_apply_xy_chain(board: Board):
     return identify_xy_chain
 
 
+def get_algo_discontinuous_nice_loop(board: Board):
+    """apply the discontinuous nice loop logic"""
+    def identify_discontinuous_nice_loop():
+        get_algo_invalidate_solved_values(board=board)()
+        find_discontinuous_nice_loop(board=board)
+        board.validate_consistency_in_all_houses()
+    return identify_discontinuous_nice_loop
+
+
 def get_algo_remote_pair(board: Board):
     """find remote-pair algorithm (similar to x-chain
     and xy-chain)"""
@@ -155,3 +167,21 @@ def get_algo_xyz_wing(board: Board):
         find_xyz_wing(board=board)
         board.validate_consistency_in_all_houses()
     return identify_xyz_wing
+
+
+def get_algo_singly_or_doubly_linked_als(board: Board):
+    """find singly- or doubly-linked almost-locked-set algorithm"""
+    def identify_singly_or_doubly_linked_als():
+        get_algo_invalidate_solved_values(board=board)()
+        find_singly_or_doubly_linked_als(board=board)
+        board.validate_consistency_in_all_houses()
+    return identify_singly_or_doubly_linked_als
+
+
+def get_algo_w_wing(board: Board):
+    """find w-wing algorithm"""
+    def identify_w_wing():
+        get_algo_invalidate_solved_values(board=board)()
+        find_w_wing(board=board)
+        board.validate_consistency_in_all_houses()
+    return identify_w_wing

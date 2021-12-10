@@ -1,31 +1,31 @@
 from typing import Dict, Tuple
 
-# # not solved, yet
-# SUDOKU = (
-#     '       2 ',
-#     '  64  13 ',
-#     '4   9    ',
-#     '   1    2',
-#     '  8     9',
-#     ' 3  7 81 ',
-#     '  39  64 ',
-#     '        8',
-#     ' 7   5   ',
-#     )
-
-# "extreme" (difficult but solved)
+# not solved, yet
 SUDOKU = (
-    '',
-    ' 186  45',
-    ' 2 4   3',
-    '    1 38',
-    '   3 7',
-    ' 57 6',
-    ' 9   8 6',
-    ' 86  514',
-    '',
+    '       2 ',
+    '  64  13 ',
+    '4   9    ',
+    '   1    2',
+    '  8     9',
+    ' 3  7 81 ',
+    '  39  64 ',
+    '        8',
+    ' 7   5   ',
     )
 
+# # "extreme" (difficult but solved)
+# SUDOKU = (
+#     '',
+#     ' 186  45',
+#     ' 2 4   3',
+#     '    1 38',
+#     '   3 7',
+#     ' 57 6',
+#     ' 9   8 6',
+#     ' 86  514',
+#     '',
+#     )
+# #
 
 # # "evil" (difficult but solved)
 # SUDOKU = (

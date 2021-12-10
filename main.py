@@ -1,5 +1,5 @@
 from sudoku_solver.solver.algorithms import get_algo_remote_pair, get_algo_two_string_kite, get_algo_xyz_wing, \
-    get_algo_locked_candidate
+    get_algo_locked_candidate, get_algo_singly_or_doubly_linked_als, get_algo_w_wing, get_algo_discontinuous_nice_loop
 from sudoku_solver.solver.algorithms import (get_algo_hidden_subset,
                                              get_algo_naked_subset,
                                              get_algo_find_single_candidates, get_algo_invalidate_solved_values,
@@ -48,6 +48,8 @@ if __name__ == '__main__':
                             handler=get_algo_apply_x_chain(board))
     sudoku_ui.add_algorithm(text="XY-Chain",
                             handler=get_algo_apply_xy_chain(board))
+    sudoku_ui.add_algorithm(text="Discontinuous Nice Loop",
+                            handler=get_algo_discontinuous_nice_loop(board))
     sudoku_ui.add_algorithm(text="Remote Pair",
                             handler=get_algo_remote_pair(board))
     sudoku_ui.add_algorithm(text="2-String Kite",
@@ -56,6 +58,10 @@ if __name__ == '__main__':
                             handler=get_algo_xy_wing(board))
     sudoku_ui.add_algorithm(text="XYZ-Wing",
                             handler=get_algo_xyz_wing(board))
+    sudoku_ui.add_algorithm(text="W-Wing",
+                            handler=get_algo_w_wing(board))
+    sudoku_ui.add_algorithm(text="Singly- or doubly-linked Almost-Locked Set",
+                            handler=get_algo_singly_or_doubly_linked_als(board))
 
     # stats = Stats(board)
     # print(f'Original Board')

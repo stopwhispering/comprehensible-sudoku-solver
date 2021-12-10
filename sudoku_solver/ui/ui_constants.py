@@ -1,6 +1,6 @@
 from enum import Enum
 
-MARGIN = 50  # px around board; enlarge to allow for more buttons
+MARGIN = 100  # px around board; enlarge to allow for more buttons
 CELL_LENGTH = 60  # width of every board cell.
 WIDTH = HEIGHT = MARGIN * 2 + CELL_LENGTH * 9  # Width and height of the whole board
 BUTTONS_WIDTH = 450

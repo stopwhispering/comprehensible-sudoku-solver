@@ -54,23 +54,23 @@ def find_skyscraper_rows_type(board: Board) -> Skyscraper:
             # 0,1,2 or 3,4,5 or 6,7,8, then we have a skyscraper
             cells_roof = [c for c in cells1 + cells2 if c.column in skyscraper_roof]
             assert len(cells_roof) == 2
-            if board.get_cells_same_band(cells=cells_roof, mode='vertical'):
+            # if board.get_cells_same_band(cells=cells_roof, mode='vertical'):
 
-                # we may now invalidate the value under consideration for all cells that "see" both roof cells
-                cells_seeing_roof_cell1_raw = (cells_roof[0].column.get_cells_having_candidate(value) + cells_roof[
-                    0].block.get_cells_having_candidate(value))
-                cells_seeing_roof_cell1 = set([c for c in cells_seeing_roof_cell1_raw if c not in cells1 + cells2])
+            # we may now invalidate the value under consideration for all cells that "see" both roof cells
+            cells_seeing_roof_cell1_raw = (cells_roof[0].column.get_cells_having_candidate(value) + cells_roof[
+                0].block.get_cells_having_candidate(value))
+            cells_seeing_roof_cell1 = set([c for c in cells_seeing_roof_cell1_raw if c not in cells1 + cells2])
 
-                cells_seeing_roof_cell2_raw = (cells_roof[1].column.get_cells_having_candidate(value) + cells_roof[
-                    1].block.get_cells_having_candidate(value))
-                cells_seeing_roof_cell2 = set([c for c in cells_seeing_roof_cell2_raw if c not in cells1 + cells2])
+            cells_seeing_roof_cell2_raw = (cells_roof[1].column.get_cells_having_candidate(value) + cells_roof[
+                1].block.get_cells_having_candidate(value))
+            cells_seeing_roof_cell2 = set([c for c in cells_seeing_roof_cell2_raw if c not in cells1 + cells2])
 
-                cells_seeing_both_roof_cells = cells_seeing_roof_cell1.intersection(cells_seeing_roof_cell2)
-                if cells_seeing_both_roof_cells:
-                    skyscraper = Skyscraper(candidate=value,
-                                            cells_seeing_both_roof_cells=cells_seeing_both_roof_cells)
-                    # cancel here to avoid inconsistencies due to not updated cells
-                    return skyscraper
+            cells_seeing_both_roof_cells = cells_seeing_roof_cell1.intersection(cells_seeing_roof_cell2)
+            if cells_seeing_both_roof_cells:
+                skyscraper = Skyscraper(candidate=value,
+                                        cells_seeing_both_roof_cells=cells_seeing_both_roof_cells)
+                # cancel here to avoid inconsistencies due to not updated cells
+                return skyscraper
 
 
 def find_skyscraper_cols_type(board: Board) -> Skyscraper:
@@ -98,20 +98,20 @@ def find_skyscraper_cols_type(board: Board) -> Skyscraper:
             # 0,1,2 or 3,4,5 or 6,7,8, then we have a skyscraper
             cells_roof = [c for c in cells1 + cells2 if c.row in skyscraper_roof]
             assert len(cells_roof) == 2
-            if board.get_cells_same_band(cells=cells_roof, mode='vertical'):
+            # if board.get_cells_same_band(cells=cells_roof, mode='vertical'):
 
-                # we may now invalidate the value under consideration for all cells that "see" both roof cells
-                cells_seeing_roof_cell1_raw = (cells_roof[0].row.get_cells_having_candidate(value) + cells_roof[
-                    0].block.get_cells_having_candidate(value))
-                cells_seeing_roof_cell1 = set([c for c in cells_seeing_roof_cell1_raw if c not in cells1 + cells2])
+            # we may now invalidate the value under consideration for all cells that "see" both roof cells
+            cells_seeing_roof_cell1_raw = (cells_roof[0].row.get_cells_having_candidate(value) + cells_roof[
+                0].block.get_cells_having_candidate(value))
+            cells_seeing_roof_cell1 = set([c for c in cells_seeing_roof_cell1_raw if c not in cells1 + cells2])
 
-                cells_seeing_roof_cell2_raw = (cells_roof[1].row.get_cells_having_candidate(value) + cells_roof[
-                    1].block.get_cells_having_candidate(value))
-                cells_seeing_roof_cell2 = set([c for c in cells_seeing_roof_cell2_raw if c not in cells1 + cells2])
+            cells_seeing_roof_cell2_raw = (cells_roof[1].row.get_cells_having_candidate(value) + cells_roof[
+                1].block.get_cells_having_candidate(value))
+            cells_seeing_roof_cell2 = set([c for c in cells_seeing_roof_cell2_raw if c not in cells1 + cells2])
 
-                cells_seeing_both_roof_cells = cells_seeing_roof_cell1.intersection(cells_seeing_roof_cell2)
-                if cells_seeing_both_roof_cells:
-                    skyscraper = Skyscraper(candidate=value,
-                                            cells_seeing_both_roof_cells=cells_seeing_both_roof_cells)
-                    # cancel here to avoid inconsistencies due to not updated cells
-                    return skyscraper
+            cells_seeing_both_roof_cells = cells_seeing_roof_cell1.intersection(cells_seeing_roof_cell2)
+            if cells_seeing_both_roof_cells:
+                skyscraper = Skyscraper(candidate=value,
+                                        cells_seeing_both_roof_cells=cells_seeing_both_roof_cells)
+                # cancel here to avoid inconsistencies due to not updated cells
+                return skyscraper
