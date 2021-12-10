@@ -1,10 +1,13 @@
+from sudoku_solver.solver.two_string_kite import find_two_string_kite
 from sudoku_solver.solver.remote_pair import find_remote_pair
 from sudoku_solver.board.board import Board
 from sudoku_solver.solver.chains import find_xy_chain, find_x_chain
 from sudoku_solver.solver.fish import find_n_fish
 from sudoku_solver.solver.hidden_subset import find_hidden_subset
 from sudoku_solver.solver.naked_subset import find_naked_subset
+from sudoku_solver.solver.locked_candidate import find_locked_candidate
 from sudoku_solver.solver.skyscraper import find_skyscraper
+from sudoku_solver.solver.xy_z_wing import find_xy_wing, find_xyz_wing
 
 
 def get_algo_invalidate_solved_values(board: Board):
@@ -43,6 +46,21 @@ def get_algo_naked_subset(board: Board):
         find_naked_subset(board=board)
         board.validate_consistency_in_all_houses()
     return identify_naked_subset
+
+
+def get_algo_locked_candidate(board: Board):
+    """in a house, look for all cells having a specific candidate
+       a. if we're in a box, test if all these cells are in a single row or column
+       b. if we're in a row/col, test if all these cells are in a single box
+    if true, we can invalidate that candidate for...
+       a. other cells in that row or column
+       b. other cells in that box
+    """
+    def identify_find_locked_candidate():
+        get_algo_invalidate_solved_values(board=board)()
+        find_locked_candidate(board=board)
+        board.validate_consistency_in_all_houses()
+    return identify_find_locked_candidate
 
 
 def get_algo_hidden_subset(board: Board):
@@ -104,9 +122,36 @@ def get_algo_apply_xy_chain(board: Board):
 
 def get_algo_remote_pair(board: Board):
     """find remote-pair algorithm (similar to x-chain
-    and xy-chain"""
+    and xy-chain)"""
     def identify_remote_pair():
         get_algo_invalidate_solved_values(board=board)()
         find_remote_pair(board=board)
         board.validate_consistency_in_all_houses()
     return identify_remote_pair
+
+
+def get_algo_two_string_kite(board: Board):
+    """find 2-string kite algorithm (similar to x-chain)"""
+    def identify_two_string_kite():
+        get_algo_invalidate_solved_values(board=board)()
+        find_two_string_kite(board=board)
+        board.validate_consistency_in_all_houses()
+    return identify_two_string_kite
+
+
+def get_algo_xy_wing(board: Board):
+    """find xy-wing algorithm (similar to xy-chain)"""
+    def identify_xy_wing():
+        get_algo_invalidate_solved_values(board=board)()
+        find_xy_wing(board=board)
+        board.validate_consistency_in_all_houses()
+    return identify_xy_wing
+
+
+def get_algo_xyz_wing(board: Board):
+    """find xyz-wing algorithm (similar to xy-wing)"""
+    def identify_xyz_wing():
+        get_algo_invalidate_solved_values(board=board)()
+        find_xyz_wing(board=board)
+        board.validate_consistency_in_all_houses()
+    return identify_xyz_wing

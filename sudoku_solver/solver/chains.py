@@ -1,9 +1,32 @@
-from typing import List
+from dataclasses import dataclass
+from typing import List, Set, Tuple
 
 from sudoku_solver.board.board import Board
 from sudoku_solver.board.cell import Cell
 from sudoku_solver.board.board_constants import LinkType
-from sudoku_solver.solver.artefacts import XYChain, XChain
+from sudoku_solver.board.preview import Preview, IndicatorLevel
+
+
+@dataclass
+class XChain(Preview):
+    chain: List[Cell]
+    candidate: int
+    other_cells_seeing_start_and_end: Set[Cell]
+
+    def get_preview_line_nodes(self) -> Tuple[Tuple[int, int, int]]:
+        """create a line from chain start to chain end"""
+        # just concatenate the x/y/c combination from start to end
+        nodes = tuple((c.x, c.y, self.candidate) for c in self.chain)
+        return nodes
+
+    def get_invalidated_candidates(self) -> Tuple[Tuple[int, int, int]]:
+        """return the board positions where the candidate is invalidated"""
+        positions = tuple((c.x, c.y, self.candidate) for c in self.other_cells_seeing_start_and_end)
+        return positions
+
+    def execute(self):
+        for cell in self.other_cells_seeing_start_and_end:
+            cell.flag_candidates_invalid([self.candidate])
 
 
 def extend_x_chain(board: Board, chain: List[Cell], candidate: int) -> XChain:
@@ -59,6 +82,82 @@ def find_x_chain(board: Board):
                 return
 
 
+class XYChain(Preview):
+    def __init__(self, starting_cell: Cell, starting_candidate: int):
+        self.chain: List[ChainCell] = []
+        self.other_cells: List[Cell] = []
+        self.starting_candidate = starting_candidate
+        self.add(starting_cell)
+
+    def __contains__(self, cell: Cell):
+        """override in operator"""
+        return cell in [c.cell for c in self.chain]
+
+    @property
+    def last_cell(self) -> Cell:
+        return self.chain[-1].cell
+
+    @property
+    def first_cell(self) -> Cell:
+        return self.chain[0].cell
+
+    @property
+    def required_candidate_for_next_cell(self):
+        if self.chain:
+            return self.chain[-1].next_candidate
+        else:
+            return self.starting_candidate
+
+    def add(self, cell):
+        assert len(cell.possible_values) == 2
+        assert self.required_candidate_for_next_cell in cell.possible_values
+        next_candidate = [c for c in cell.possible_values if c != self.required_candidate_for_next_cell][0]
+        self.chain.append(ChainCell(cell=cell,
+                                    starting_candidate=self.required_candidate_for_next_cell,
+                                    next_candidate=next_candidate))
+
+    def pop(self) -> Cell:
+        member = self.chain.pop()
+        return member.cell
+
+    def is_valid_xy_chain(self) -> bool:
+        if len(self.chain) % 2 == 0 and self.chain[0].starting_candidate == self.chain[-1].next_candidate:
+            return True
+        else:
+            return False
+
+    def get_indicator_candidates(self) -> Tuple[Tuple[int, int, int, IndicatorLevel]]:
+        positions = []
+        first_start = (self.chain[0].cell.x, self.chain[0].cell.y, self.chain[0].starting_candidate,
+                       IndicatorLevel.FIRST,)
+        first_next = (self.chain[0].cell.x, self.chain[0].cell.y, self.chain[0].next_candidate,
+                      IndicatorLevel.DEFAULT,)
+        positions.append(first_start)
+        positions.append(first_next)
+
+        for member in self.chain:
+            positions.append((member.cell.x, member.cell.y, member.starting_candidate, IndicatorLevel.DEFAULT))
+            positions.append((member.cell.x, member.cell.y, member.next_candidate, IndicatorLevel.ALTERNATIVE))
+
+        last_start = (self.chain[-1].cell.x, self.chain[-1].cell.y, self.chain[-1].starting_candidate,
+                      IndicatorLevel.DEFAULT)
+        last_next = (self.chain[-1].cell.x, self.chain[-1].cell.y, self.chain[-1].next_candidate,
+                     IndicatorLevel.LAST)
+        positions.append(last_start)
+        positions.append(last_next)
+
+        return tuple(positions)
+
+    def get_invalidated_candidates(self) -> Tuple[Tuple[int, int, int]]:
+        """return the board positions where the candidate is invalidated"""
+        positions = tuple((c.x, c.y, self.starting_candidate) for c in self.other_cells)
+        return positions
+
+    def execute(self):
+        for cell in self.other_cells:
+            cell.flag_candidates_invalid([self.starting_candidate])
+
+
 def _extend_xy_chain(board: Board, chain: XYChain) -> XYChain:
     """add (recursively) another cell to an existing xy chain and check whether we have a complete xy chain and
     can invalidate something"""
@@ -108,3 +207,8 @@ def find_xy_chain(board: Board):
                 return
 
 
+@dataclass
+class ChainCell:
+    cell: Cell
+    starting_candidate: int
+    next_candidate: int

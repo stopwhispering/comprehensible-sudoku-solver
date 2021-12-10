@@ -1,7 +1,9 @@
 import itertools
+from typing import Set, Tuple
 
 from sudoku_solver.board.board import Board
-from sudoku_solver.solver.artefacts import Skyscraper
+from sudoku_solver.board.cell import Cell
+from sudoku_solver.board.preview import Preview
 
 
 def find_skyscraper(board: Board):
@@ -10,6 +12,21 @@ def find_skyscraper(board: Board):
         skyscraper = find_skyscraper_cols_type(board=board)
     if skyscraper:
         board.notify_preview(preview=skyscraper)
+
+
+class Skyscraper(Preview):
+    def __init__(self, candidate: int, cells_seeing_both_roof_cells: Set[Cell]):
+        self.candidate = candidate
+        self.cells_seeing_both_roof_cells = cells_seeing_both_roof_cells
+
+    def get_invalidated_candidates(self) -> Tuple[Tuple[int, int, int]]:
+        """return the board positions where the candidate is invalidated"""
+        positions = tuple((c.x, c.y, self.candidate) for c in self.cells_seeing_both_roof_cells)
+        return positions
+
+    def execute(self):
+        for cell in self.cells_seeing_both_roof_cells:
+            cell.flag_candidates_invalid([self.candidate])
 
 
 def find_skyscraper_rows_type(board: Board) -> Skyscraper:

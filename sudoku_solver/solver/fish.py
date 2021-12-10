@@ -1,12 +1,38 @@
+from typing import List, Tuple
+
 from sudoku_solver.board.board import Board
-from sudoku_solver.solver.artefacts import NFish
+from sudoku_solver.board.cell import Cell
+from sudoku_solver.board.preview import Preview, IndicatorLevel
+
+
+class NFish(Preview):
+    def __init__(self, candidate: int,
+                 cells_in_base_rows_or_columns: List[Cell],
+                 other_cells_in_cover_columns_or_rows: List[Cell]):
+        self.candidate = candidate
+        self.cells_in_base_rows_or_columns = cells_in_base_rows_or_columns
+        self.other_cells_in_cover_columns_or_rows = other_cells_in_cover_columns_or_rows
+
+    def get_indicator_candidates(self) -> Tuple[Tuple[int, int, int, IndicatorLevel]]:
+        """return the board positions of base row candidates"""
+        pos = tuple((c.x, c.y, self.candidate, IndicatorLevel.DEFAULT) for c in self.cells_in_base_rows_or_columns)
+        return pos
+
+    def get_invalidated_candidates(self) -> Tuple[Tuple[int, int, int]]:
+        """return the board positions where the candidate is invalidated"""
+        positions = tuple((c.x, c.y, self.candidate) for c in self.other_cells_in_cover_columns_or_rows)
+        return positions
+
+    def execute(self):
+        for cell in self.other_cells_in_cover_columns_or_rows:
+            cell.flag_candidates_invalid([self.candidate])
 
 
 def _invalidate_with_n_fish_in_rows(board: Board, value: int, n: int) -> NFish:
     """
-    If n (e.g. 3) rows exist in which the candidate under consideration occurs only in exactly the same n different
-    columns (either in all those columns or in two of them), then we have found a fish (3 -> swordfish). We may then
-    invalidate the candidate in all other cells of those columns. (cf. x-wing)
+    If n (e.g. 3 for a swordfish) rows exist in which the candidate under consideration occurs only in exactly the
+    same n different columns (either in all those columns or in two of them), then we have found a fish. We may then
+    invalidate the candidate in all other cells of those columns.
     """
     # identify rows with exactly n cells having the candidate under consideration
     rows = board.rows.values()
@@ -27,7 +53,7 @@ def _invalidate_with_n_fish_in_rows(board: Board, value: int, n: int) -> NFish:
             if not [c for c in cells_with_candidate if c.column not in cover_columns]:
                 base_rows.append(maybe_base_row)
 
-        assert len(base_rows) <= n
+        # assert len(base_rows) <= n
         if len(base_rows) == n:
             # now we can invalidate the value under consideration in all <<other>> cells of the three
             # cover columns

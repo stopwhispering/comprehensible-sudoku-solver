@@ -2,7 +2,7 @@ from __future__ import annotations
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
-    from sudoku_solver.solver.artefacts import Artefact
+    from sudoku_solver.board.preview import Preview
 
 
 class SudokuObservable:
@@ -21,7 +21,7 @@ class SudokuObservable:
             self.observers_invalidating_candidate.append(observer)
 
     def subscribe_preview(self, observer_preview: callable):
-        """subscribe to receive preview objects of type Artefact to indicate pattern; they include
+        """subscribe to receive preview objects of type Preview to indicate pattern; they include
         an execute() fn"""
         if observer_preview not in self.observers_preview:
             self.observers_preview.append(observer_preview)
@@ -34,6 +34,6 @@ class SudokuObservable:
         for observer in self.observers_invalidating_candidate:
             observer(x, y, invalidated_value)
 
-    def notify_preview(self, preview: Artefact):
+    def notify_preview(self, preview: Preview):
         for observer in self.observers_preview:
             observer(preview)

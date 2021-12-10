@@ -55,14 +55,14 @@ class House:
         values = [cell.value for cell in self.cells.values() if cell.value]
         duplicates = set([x for x in values if values.count(x) > 1])
         if duplicates:
-            print(f'Found Inconsistency - Duplicate(s) in {self}: {duplicates}')
+            raise ValueError(f'Found Inconsistency - Duplicate(s) in {self}: {duplicates}')
 
         candidates = [cell.possible_values for cell in self.cells.values() if not cell.is_solved()]
         flat = [c for cell_candidates in candidates for c in cell_candidates] + values
         candidates_distinct = set(flat)
         missing = set(range(1, 10)).difference(candidates_distinct)
         if missing:
-            print(f'Found Inconsistency - Candidate(s) missing in {self}: {missing}')
+            raise ValueError(f'Found Inconsistency - Candidate(s) missing in {self}: {missing}')
 
     def get_cells(self, only_unsolved=False, only_solved=False) -> List[Cell]:
         if only_solved:
@@ -72,13 +72,20 @@ class House:
         else:
             return list(self.cells.values())
 
-    def get_cells_having_candidate(self, candidate: int, n_candidates: int = None) -> List[Cell]:
-        """optional filter on only linked cells with exactly n total candidates"""
+    def get_cells_having_candidate(self, candidate: int,
+                                   n_candidates: int = None,
+                                   except_cells: Sequence[Cell] = None) -> List[Cell]:
+        """returns all cells of this house that have supplied candidate;
+        optionally filter on only cells with exactly n total candidates;
+        optionally filter on cells that are not in supplied exeption list
+        """
         all_cells = self.get_cells(only_unsolved=True)
         if n_candidates:
             cells = [c for c in all_cells if candidate in c.possible_values and len(c.possible_values) == n_candidates]
         else:
             cells = [c for c in all_cells if candidate in c.possible_values]
+        if except_cells:
+            cells = [c for c in cells if c not in except_cells]
         return cells
 
     def get_cells_having_any_of_candidates(self, candidates: Sequence[int]):
@@ -86,15 +93,21 @@ class House:
         cells = [c for c in all_cells if not set(candidates).isdisjoint(c.possible_values)]
         return cells
 
-    def get_cells_having_each_of_candidates(self, candidate_values: Sequence[int]):
+    def get_cells_having_each_of_candidates(self, candidates: Sequence[int]):
         all_cells = self.get_cells(only_unsolved=True)
-        cells = [c for c in all_cells if set(c.possible_values).issuperset(candidate_values)]
+        cells = [c for c in all_cells if set(c.possible_values).issuperset(candidates)]
         return cells
 
     def get_cells_having_only_candidates(self, candidate_values: Sequence[int]):
         """return cells that have only supplied candidates, i.e. at least one of them and no other candidates"""
         all_cells = self.get_cells(only_unsolved=True)
         cells = [c for c in all_cells if set(candidate_values).issuperset(c.possible_values)]
+        return cells
+
+    def get_cells_having_exact_candidates(self, candidates: Sequence[int]):
+        """return cells that have exactly the supplied candidates, i.e. no less and no more"""
+        all_cells = self.get_cells(only_unsolved=True)
+        cells = [c for c in all_cells if set(candidates) == set(c.possible_values)]
         return cells
 
     def solve_single_candidates(self):
@@ -107,6 +120,24 @@ class House:
                 cells_having_that_candidate[0].set_solved_value_to(value)
             # return
         self.validate_consistency()
+
+    @staticmethod
+    def cells_in_same_row(cells: Sequence[Cell]):
+        """returns true if all supplied cells are in the same row"""
+        rows = [c.row for c in cells]
+        return len(set(rows)) == 1
+
+    @staticmethod
+    def cells_in_same_col(cells: Sequence[Cell]):
+        """returns true if all supplied cells are in the same column"""
+        cols = [c.column for c in cells]
+        return len(set(cols)) == 1
+
+    @staticmethod
+    def cells_in_same_block(cells: Sequence[Cell]):
+        """returns true if all supplied cells are in the same block"""
+        blocks = [c.block for c in cells]
+        return len(set(blocks)) == 1
 
 
 class Row(House):

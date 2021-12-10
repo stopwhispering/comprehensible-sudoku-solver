@@ -1,7 +1,7 @@
 from typing import Tuple, Dict, List, Optional, Callable
 import tkinter
 
-from sudoku_solver.solver.artefacts import Artefact, IndicatorLevel
+from sudoku_solver.board.preview import Preview, IndicatorLevel
 from sudoku_solver.ui.rectangles import CandidateRectangle, ValueRectangle
 from sudoku_solver.ui.ui_constants import (MARGIN, CELL_LENGTH, WIDTH, HEIGHT, BUTTONS_WIDTH,
                                            PADDING_BETWEEN_BUTTONS, COLOR)
@@ -138,7 +138,6 @@ class SudokuUI(tkinter.Frame):
 
     def _draw_preview_indications(self, indicated_positions: Tuple[Tuple[int, int, int, Optional[IndicatorLevel]]]):
         for position in indicated_positions:
-            # todo: central mapping from level to color
             if len(position) < 4:
                 color = COLOR.GREEN
             elif position[3] == IndicatorLevel.DEFAULT:
@@ -156,7 +155,7 @@ class SudokuUI(tkinter.Frame):
             preview_overlay = candidate_rectangle.paint_preview_overlay(color=color)
             self.previous_preview_ids.append(preview_overlay)
 
-    def observe_preview(self, preview: Artefact):
+    def observe_preview(self, preview: Preview):
         line_nodes = preview.get_preview_line_nodes()
         if line_nodes:
             self._draw_preview_line(line_nodes=line_nodes)

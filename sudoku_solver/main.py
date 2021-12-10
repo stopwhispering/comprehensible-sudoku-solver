@@ -1,17 +1,17 @@
-from solver.algorithms import get_algo_remote_pair
+from sudoku_solver.solver.algorithms import get_algo_remote_pair, get_algo_two_string_kite, get_algo_xyz_wing, \
+    get_algo_locked_candidate
 from sudoku_solver.solver.algorithms import (get_algo_hidden_subset,
                                              get_algo_naked_subset,
                                              get_algo_find_single_candidates, get_algo_invalidate_solved_values,
                                              get_algo_invalidate_with_n_fish,
-                                             get_algo_apply_skyscraper, get_algo_apply_x_chain, get_algo_apply_xy_chain)
+                                             get_algo_apply_skyscraper, get_algo_apply_x_chain, get_algo_apply_xy_chain,
+                                             get_algo_xy_wing)
 from sudoku_solver.board.board import Board
-from sudoku_solver.puzzles.prefills import parse_sudoku, SUDOKU_HELL_DIFFICULT, SUDOKU_VERY_DIFFICULT
+from sudoku_solver.puzzles.prefills import parse_sudoku, SUDOKU
 from sudoku_solver.ui.ui import init_ui, run_ui_loop
 
 if __name__ == '__main__':
-    # prefilled_values = parse_sudoku(SUDOKU_MEDIUM)
-    # prefilled_values = parse_sudoku(SUDOKU_VERY_DIFFICULT)
-    prefilled_values = parse_sudoku(SUDOKU_HELL_DIFFICULT)
+    prefilled_values = parse_sudoku(SUDOKU)
     board = Board(prefilled_values=prefilled_values)
 
     # have board and ui in sync via observer pattern
@@ -24,6 +24,8 @@ if __name__ == '__main__':
                             handler=get_algo_invalidate_solved_values(board))
     sudoku_ui.add_algorithm(text="Find single candidates",
                             handler=get_algo_find_single_candidates(board))
+    sudoku_ui.add_algorithm(text="Locked Candidate",
+                            handler=get_algo_locked_candidate(board))
     sudoku_ui.add_algorithm(text="Naked Subset (Pair, Triple, Quadruple, Quintuple)",
                             handler=get_algo_naked_subset(board))
     sudoku_ui.add_algorithm(text="Hidden Subset (Pair, Triple, Quadruple, Quintuple)",
@@ -48,6 +50,12 @@ if __name__ == '__main__':
                             handler=get_algo_apply_xy_chain(board))
     sudoku_ui.add_algorithm(text="Remote Pair",
                             handler=get_algo_remote_pair(board))
+    sudoku_ui.add_algorithm(text="2-String Kite",
+                            handler=get_algo_two_string_kite(board))
+    sudoku_ui.add_algorithm(text="XY-Wing",
+                            handler=get_algo_xy_wing(board))
+    sudoku_ui.add_algorithm(text="XYZ-Wing",
+                            handler=get_algo_xyz_wing(board))
 
     # stats = Stats(board)
     # print(f'Original Board')

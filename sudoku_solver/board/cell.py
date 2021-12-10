@@ -13,8 +13,8 @@ class Cell(SudokuObservable):
     def __init__(self, x: int, y: int, prefilled_value: int = None):
         super().__init__()
 
-        self.x = x
-        self.y = y
+        self.x: int = x
+        self.y: int = y
         self.z = self._get_block(x, y)
         self.possible_values: List[int] = list(range(1, 10)) if not prefilled_value else [prefilled_value]
 
@@ -84,21 +84,39 @@ class Cell(SudokuObservable):
         linked_distinct = set(linked)
         return linked_distinct
 
-    def seen_by(self, candidate: int) -> Set[Cell]:
+    def seen_by(self, candidate: int, n_candidates: int = None) -> Set[Cell]:
         """return all other cells seeing this cell considering supplied candidate; consider all houses (row, column,
-        block"""
-        seen_by_raw = (self.column.get_cells_having_candidate(candidate=candidate) +
-                       self.row.get_cells_having_candidate(candidate=candidate) +
-                       self.block.get_cells_having_candidate(candidate=candidate))
+        block; optionally limit to cells having n candidates"""
+        seen_by_raw = (self.column.get_cells_having_candidate(candidate=candidate, n_candidates=n_candidates) +
+                       self.row.get_cells_having_candidate(candidate=candidate, n_candidates=n_candidates) +
+                       self.block.get_cells_having_candidate(candidate=candidate, n_candidates=n_candidates))
         seen_by = [c for c in seen_by_raw if c is not self]
         return set(seen_by)
 
     def seen_by_any_of_candidates(self, candidates: Sequence[int]) -> Set[Cell]:
         """return all other cells seeing this cell which have any (i.e. one or more) of the supplied candidates;
-        consider all houses (row, column,block"""
+        consider all houses (row, column,block)"""
         seen_by_raw = (self.column.get_cells_having_any_of_candidates(candidates=candidates) +
                        self.row.get_cells_having_any_of_candidates(candidates=candidates) +
                        self.block.get_cells_having_any_of_candidates(candidates=candidates))
+        seen_by = [c for c in seen_by_raw if c is not self]
+        return set(seen_by)
+
+    def seen_by_with_all_candidates(self, candidates: Sequence[int]) -> Set[Cell]:
+        """return all other cells seeing this cell which have all the supplied candidates;
+        consider all houses (row, column,block)"""
+        seen_by_raw = (self.column.get_cells_having_each_of_candidates(candidates=candidates) +
+                       self.row.get_cells_having_each_of_candidates(candidates=candidates) +
+                       self.block.get_cells_having_each_of_candidates(candidates=candidates))
+        seen_by = [c for c in seen_by_raw if c is not self]
+        return set(seen_by)
+
+    def seen_by_with_exact_candidates(self, candidates: Sequence[int]) -> Set[Cell]:
+        """return all other cells seeing this cell which have exactly the supplied candidates;
+        consider all houses (row, column,block)"""
+        seen_by_raw = (self.column.get_cells_having_exact_candidates(candidates=candidates) +
+                       self.row.get_cells_having_exact_candidates(candidates=candidates) +
+                       self.block.get_cells_having_exact_candidates(candidates=candidates))
         seen_by = [c for c in seen_by_raw if c is not self]
         return set(seen_by)
 

@@ -4,7 +4,7 @@ from typing import Sequence, Set, List, Tuple
 
 from sudoku_solver.board.board import Board
 from sudoku_solver.board.cell import Cell
-from sudoku_solver.solver.artefacts import Artefact, IndicatorLevel
+from sudoku_solver.board.preview import Preview, IndicatorLevel
 
 
 @dataclass
@@ -14,7 +14,7 @@ class RemotePairMember:
     other_cells: Set[Cell]
 
 
-class RemotePair(Artefact):
+class RemotePair(Preview):
     def __init__(self, candidates: Tuple[int, int]):
         self.candidates = candidates
         self.members: List[RemotePairMember] = []
@@ -77,13 +77,12 @@ def _is_remote_pair(cells: Sequence[Cell]):
 
 def _find_remote_pairs_for_candidate_combination(candidates: Tuple[int, int],
                                                  combi_cells: List[Cell]) -> List[Tuple[RemotePair, int]]:
-
     # build longest possible chain by testing all cell orders (and all lengths 4+)
     assert len(combi_cells) >= 4
     remote_pairs: List[Tuple[RemotePair, int]] = []
 
     cell_combinations = []
-    for length in range(4, len(combi_cells)+1):
+    for length in range(4, len(combi_cells) + 1):
         cell_combinations.extend(list(itertools.permutations(combi_cells, length)))
 
     cell_combination: Tuple[Cell]
@@ -121,7 +120,7 @@ def find_remote_pair(board: Board):
 
         # find remote pairs for current combination of two candidates (and their cells)
         remote_pairs = _find_remote_pairs_for_candidate_combination(candidates=candidate_combination,
-                                                     combi_cells=combi_cells)
+                                                                    combi_cells=combi_cells)
         if remote_pairs:
             # apply remote pair that invalidates the most other cells' candidates
             remote_pairs_sorted_desc = sorted(remote_pairs, key=lambda r: r[1], reverse=True)

@@ -1,5 +1,5 @@
 import itertools
-from typing import Dict, Tuple, List, Set
+from typing import Dict, Tuple, List, Set, Sequence
 import pandas as pd
 
 from sudoku_solver.board.houses import Row, Column, Block, House
@@ -127,7 +127,14 @@ class Board(SudokuObservable):
 
     @staticmethod
     def get_cells_seeing_both_supplied_cells(candidate: int, cell_a: Cell, cell_b: Cell) -> Set[Cell]:
+        # todo replace by generic version below
         cells_seeing_a = cell_a.seen_by(candidate=candidate)
         cells_seeing_b = cell_b.seen_by(candidate=candidate)
         cells_seeing_both = cells_seeing_a.intersection(cells_seeing_b)
         return cells_seeing_both
+
+    @staticmethod
+    def get_cells_seeing_all_supplied_cells(candidate: int, cells: Sequence[Cell]) -> Set[Cell]:
+        cells_seeing = [cell.seen_by(candidate=candidate) for cell in cells]
+        cells_seeing_each = set.intersection(*cells_seeing)
+        return cells_seeing_each
