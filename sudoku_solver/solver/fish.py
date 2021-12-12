@@ -55,7 +55,7 @@ def _invalidate_with_n_fish_in_rows(board: Board, value: int, n: int) -> NFish:
 
         # assert len(base_rows) <= n
         if len(base_rows) == n:
-            # now we can invalidate the value under consideration in all <<other>> cells of the three
+            # now we can invalidate the candidate under consideration in all <<other>> cells of the three
             # cover columns
             for cover_column in cover_columns:
                 other_cells = [c for c in cover_column.get_cells_having_candidate(value) if c.row not in base_rows]

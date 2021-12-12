@@ -64,7 +64,7 @@ def find_x_chain(board: Board):
     """apply the x-chain logic
     - an x-chain has an even number of chained cells
     - odd links must be strong links, even links may be weak links (but can also be strong links)
-    - either the starting or the ending cell has the candidate as it's value. therefore, all cells which are
+    - either the starting or the ending cell has the candidate as it's candidate. therefore, all cells which are
         not part of the chain and which can see the both the starting and ending cell, may <<not>> have the
         candidate.
     """
@@ -109,9 +109,9 @@ class XYChain(Preview):
             return self.starting_candidate
 
     def add(self, cell):
-        assert len(cell.possible_values) == 2
-        assert self.required_candidate_for_next_cell in cell.possible_values
-        next_candidate = [c for c in cell.possible_values if c != self.required_candidate_for_next_cell][0]
+        assert len(cell.candidates) == 2
+        assert self.required_candidate_for_next_cell in cell.candidates
+        next_candidate = [c for c in cell.candidates if c != self.required_candidate_for_next_cell][0]
         self.chain.append(ChainCell(cell=cell,
                                     starting_candidate=self.required_candidate_for_next_cell,
                                     next_candidate=next_candidate))

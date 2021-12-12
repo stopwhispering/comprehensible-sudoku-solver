@@ -56,7 +56,7 @@ def find_skyscraper_rows_type(board: Board) -> Skyscraper:
             assert len(cells_roof) == 2
             # if board.get_cells_same_band(cells=cells_roof, mode='vertical'):
 
-            # we may now invalidate the value under consideration for all cells that "see" both roof cells
+            # we may now invalidate the candidate under consideration for all cells that "see" both roof cells
             cells_seeing_roof_cell1_raw = (cells_roof[0].column.get_cells_having_candidate(value) + cells_roof[
                 0].block.get_cells_having_candidate(value))
             cells_seeing_roof_cell1 = set([c for c in cells_seeing_roof_cell1_raw if c not in cells1 + cells2])
@@ -100,7 +100,7 @@ def find_skyscraper_cols_type(board: Board) -> Skyscraper:
             assert len(cells_roof) == 2
             # if board.get_cells_same_band(cells=cells_roof, mode='vertical'):
 
-            # we may now invalidate the value under consideration for all cells that "see" both roof cells
+            # we may now invalidate the candidate under consideration for all cells that "see" both roof cells
             cells_seeing_roof_cell1_raw = (cells_roof[0].row.get_cells_having_candidate(value) + cells_roof[
                 0].block.get_cells_having_candidate(value))
             cells_seeing_roof_cell1 = set([c for c in cells_seeing_roof_cell1_raw if c not in cells1 + cells2])

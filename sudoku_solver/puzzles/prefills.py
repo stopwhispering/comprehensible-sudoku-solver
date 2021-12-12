@@ -1,5 +1,7 @@
 from typing import Dict, Tuple
 
+
+
 # not solved, yet
 SUDOKU = (
     '       2 ',
@@ -12,6 +14,85 @@ SUDOKU = (
     '        8',
     ' 7   5   ',
     )
+
+# empty rectangle 2
+# SUDOKU = (
+#     '598643  2',
+#     '  3759648',
+#     '674128593',
+#     '4572  83',
+#     '9 63 7425',
+#     ' 324 5 6',
+#     '  59 438',
+#     '341872956',
+#     '  953 2 4',
+# )
+
+# empty rectangle
+# SUDOKU = (
+#     '724956138',
+#     '168423597',
+#     '935718624',
+#     '5  3  81',
+#     ' 4  8175',
+#     ' 81 7 24',
+#     ' 13    72',
+#     '   1   85',
+#     ' 5   7 61',
+# )
+
+# sue de coq 2
+# SUDOKU = (
+#     '   72841',
+#     '1 293 87',
+#     '   1    9',
+#     '68       ',
+#     '     96 1',
+#     ' 1  5   8',
+#     '7  4  1',
+#     '  65  39',
+#     '5 1',
+# )
+
+# # sue de coq
+# SUDOKU = (
+#     '148327  9',
+#     '267594381',
+#     ' 3 861742',
+#     '396452178',
+#     '714638925',
+#     '852  9',
+#     ' 8      7',
+#     ' 7  852',
+#     ' 21  38',
+# )
+
+# unique rectangle type II
+# SUDOKU = (
+#     '4695  271',
+#     '185762439',
+#     '7239  856',
+#     '647859312',
+#     '318427695',
+#     '952  6784',
+#     '  4 9 56',
+#     '  16 59',
+#     '596 7 1',
+# )
+
+# unique rectangle type IV
+# SUDOKU = (
+#     '3  76  98',
+#     ' 86 354 1',
+#     '    8  3',
+#     '   6523 9',
+#     '   473  2',
+#     '235198 4',
+#     '493826',
+#     '821547963',
+#     '  7319  4',
+# )
+
 
 # # "extreme" (difficult but solved)
 # SUDOKU = (
@@ -107,13 +188,13 @@ SUDOKU = (
 #     )
 
 
-def parse_sudoku(sudoku: tuple) -> Dict[Tuple, int]:
+def parse_sudoku(sudoku: tuple) -> Dict[Tuple[int, int], int]:  # y, x -> candidate
     prefilled = {}
     assert (len(sudoku) == 9)
-    for i, row in enumerate(sudoku):
-        for x, c in enumerate(row):
+    for i, row in enumerate(sudoku, 1):
+        for x, c in enumerate(row, 1):
             if c in '123456789':
-                y = 8 - i
-                prefilled[(x, y)] = int(c)
+                y = i
+                prefilled[(y, x)] = int(c)
 
     return prefilled

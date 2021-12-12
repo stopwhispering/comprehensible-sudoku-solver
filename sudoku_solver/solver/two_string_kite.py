@@ -17,7 +17,7 @@ class TwoStringKite(Preview):
         self.kite_cells = kite_cells
 
     def get_indicator_candidates(self) -> Tuple[Tuple[int, int, int, IndicatorLevel]]:
-        """return the board positions of kite and shared-block cells in different colors"""
+        """return the board positions of kite and util-block cells in different colors"""
         pos_shared = [(cell.x, cell.y, self.candidate, IndicatorLevel.DEFAULT) for cell in self.shared_block_cells]
         pos_kite = [(cell.x, cell.y, self.candidate, IndicatorLevel.ALTERNATIVE) for cell in self.kite_cells]
         return tuple(pos_shared + pos_kite)

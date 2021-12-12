@@ -13,7 +13,7 @@ def _find_locked_candidate_in_house(house: House) -> CommonPreview:
             continue
 
         other_cells = []
-        if type(house) is Block:
+        if isinstance(house, Block):
             if house.cells_in_same_row(cells=cells_with_candidate):
                 other_cells = cells_with_candidate[0].row.get_cells_having_candidate(candidate=candidate,
                                                                                      except_cells=cells_with_candidate)
@@ -21,7 +21,7 @@ def _find_locked_candidate_in_house(house: House) -> CommonPreview:
                 other_cells = cells_with_candidate[0].column.get_cells_having_candidate(
                         candidate=candidate,
                         except_cells=cells_with_candidate)
-        elif type(house) in (Row, Column):
+        elif isinstance(house, Row) or isinstance(house, Column):
             if house.cells_in_same_block(cells=cells_with_candidate):
                 other_cells = cells_with_candidate[0].block.get_cells_having_candidate(
                         candidate=candidate,

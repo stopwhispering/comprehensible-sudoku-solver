@@ -11,14 +11,14 @@ def find_w_wing(board: Board):
     # the same house
 
     cells_with_two_candidates = board.get_cells_by_number_of_candidates(n_candidates=2)
-    candidate_pairs = [tuple(cell.possible_values) for cell in cells_with_two_candidates]
+    candidate_pairs = [tuple(cell.candidates) for cell in cells_with_two_candidates]
     candidate_pairs_two_plus = set([p for p in candidate_pairs if candidate_pairs.count(p) >= 2])
     reverse = set([(c[1], c[0]) for c in candidate_pairs_two_plus])
     # we will try first/second candidate for w/z candidate. so we need to permutate the combinations.
     # e.g. {(5,7),(1,2)} -> {(5,7),(1,2),(7,5),(2,1)}
     for candidate_combination in set.union(candidate_pairs_two_plus, reverse):
         candidate_w, candidate_z = candidate_combination
-        cells = board.get_cells_by_candidates(candidates=candidate_combination)
+        cells = board.get_cells_by_exact_candidates(candidates=candidate_combination)
         assert len(cells) >= 2
 
         cell_combinations = tuple(itertools.combinations(cells, 2))

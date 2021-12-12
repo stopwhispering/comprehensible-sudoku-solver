@@ -22,7 +22,7 @@ def find_almost_locked_sets(board: Board, max_size: int = 3) -> List[Tuple[Cell,
             cell_combinations.extend(list(itertools.combinations(cells, length)))
 
         for cell_combination in cell_combinations:
-            count_candidates = len(set([candidate for cell in cell_combination for candidate in cell.possible_values]))
+            count_candidates = len(set([candidate for cell in cell_combination for candidate in cell.candidates]))
             if count_candidates == len(cell_combination) + 1 and cell_combination not in als:
                 als.append(cell_combination)
 
@@ -33,8 +33,8 @@ def get_rcc_for_als_combination(board: Board, als_combination: Tuple[Tuple[Cell,
                                                                                                       List[int]]:
     """return restricted common candidates (rcc) (0..n) plus other common candidates (0..n)
     an rcc can be true for only one almost locked set of two"""
-    possible_values_a = set([candidate for cell in als_combination[0] for candidate in cell.possible_values])
-    possible_values_b = set([candidate for cell in als_combination[1] for candidate in cell.possible_values])
+    possible_values_a = set([candidate for cell in als_combination[0] for candidate in cell.candidates])
+    possible_values_b = set([candidate for cell in als_combination[1] for candidate in cell.candidates])
     common_candidates = possible_values_a.intersection(possible_values_b)
     if not common_candidates:
         return [], []
@@ -42,8 +42,8 @@ def get_rcc_for_als_combination(board: Board, als_combination: Tuple[Tuple[Cell,
     rcc = []
     for common_candidate in common_candidates:
         # we only have an rcc, if all cells having that candidate see each other
-        cells_a = [cell for cell in als_combination[0] if cell.is_value_candidate(common_candidate)]
-        cells_b = [cell for cell in als_combination[1] if cell.is_value_candidate(common_candidate)]
+        cells_a = [cell for cell in als_combination[0] if cell.has_candidate(common_candidate)]
+        cells_b = [cell for cell in als_combination[1] if cell.has_candidate(common_candidate)]
         assert cells_a and cells_b
 
         # cells in both sets may overlap, but not for rcc cells
@@ -64,8 +64,8 @@ def _check_singly_linked_als(board: Board,
     # we can not invalidate the other common candidate from all non-als cells that see the als-cells having
     # the common candidate
     # other_common_candidate =
-    als_cells = [cell for als in als_combination for cell in als if cell.is_value_candidate(
-            value=other_common_candidate)]
+    als_cells = [cell for als in als_combination for cell in als if cell.has_candidate(
+            candidate=other_common_candidate)]
     other_cells = board.get_cells_seeing_all_supplied_cells(candidate=other_common_candidate, cells=als_cells)
     if not other_cells:
         return None
@@ -73,7 +73,7 @@ def _check_singly_linked_als(board: Board,
     invalidated_cells = [(cell, other_common_candidate) for cell in other_cells]
     indicator_candidates = []
     for cell in als_combination[0] + als_combination[1]:
-        for candidate in cell.possible_values:
+        for candidate in cell.candidates:
             if candidate == rcc:
                 indicator_candidates.append((cell.x, cell.y, candidate, IndicatorLevel.ALTERNATIVE))
             elif candidate == other_common_candidate:
@@ -91,7 +91,7 @@ def _check_doubly_linked_als(board: Board,
                              rcc: Sequence[int]) -> Optional[CommonPreview]:
     invalidate_cells = defaultdict(list)
     for rcc_candidate in rcc:
-        cells = [cell for cells in als_combination for cell in cells if cell.is_value_candidate(rcc_candidate)]
+        cells = [cell for cells in als_combination for cell in cells if cell.has_candidate(rcc_candidate)]
         shared_houses = board.get_houses_shared_by_cells(cells=cells)
 
         # get other cells having the rcc in the houses
@@ -108,7 +108,7 @@ def _check_doubly_linked_als(board: Board,
 
         indicator_candidates = []
         for cell in als_combination[0] + als_combination[1]:
-            for candidate in cell.possible_values:
+            for candidate in cell.candidates:
                 if candidate in rcc:
                     indicator_candidates.append((cell.x, cell.y, candidate, IndicatorLevel.ALTERNATIVE))
                 else:

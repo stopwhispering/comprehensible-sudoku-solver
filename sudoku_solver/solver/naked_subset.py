@@ -18,18 +18,18 @@ class NakedSubset(Preview):
 
     def get_indicator_candidates(self) -> Tuple[Tuple[int, int, int, IndicatorLevel]]:
         """return the board positions of base row candidates"""
-        pos = [(cell.x, cell.y, c, IndicatorLevel.DEFAULT) for cell in self.naked_cells for c in cell.possible_values
+        pos = [(cell.x, cell.y, c, IndicatorLevel.DEFAULT) for cell in self.naked_cells for c in cell.candidates
                if c in self.candidates]
         return tuple(pos)
 
     def get_invalidated_candidates(self) -> Tuple[Tuple[int, int, int]]:
         """return the board positions where the candidate is invalidated"""
-        pos = [(cell.x, cell.y, c) for cell in self.other_cells for c in cell.possible_values
+        pos = [(cell.x, cell.y, c) for cell in self.other_cells for c in cell.candidates
                if c in self.candidates]
         return tuple(pos)
 
     def execute(self):
-        invalidate = [(cell, candidate) for cell in self.other_cells for candidate in cell.possible_values
+        invalidate = [(cell, candidate) for cell in self.other_cells for candidate in cell.candidates
                       if candidate in self.candidates]
         for cell, candidate in invalidate:
             cell.flag_candidates_invalid([candidate])
@@ -42,7 +42,7 @@ def _identify_naked_subset_in_house(house: House, n_cand: Tuple[int, ...]) -> Na
     unfinished_values = house.get_unfinished_values()
 
     for n in n_cand:
-        # get all triple or quadruple combinations of yet unfinished values
+        # get all triple or quadruple combinations of yet unfinished candidates
         # find out if there's exactly three cells that have <<only>> them as candidates
         value_combinations = tuple(itertools.combinations(unfinished_values, n))
         for value_combination in value_combinations:

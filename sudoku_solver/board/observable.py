@@ -26,13 +26,13 @@ class SudokuObservable:
         if observer_preview not in self.observers_preview:
             self.observers_preview.append(observer_preview)
 
-    def notify_finishing_value(self, x: int, y: int, value: int):
+    def notify_finishing_value(self, y: int, x: int, value: int):
         for observer in self.observers_finishing_value:
-            observer(x, y, value)
+            observer(y, x, value)
 
-    def notify_invalidating_candidate(self, x: int, y: int, invalidated_value: int):
+    def notify_invalidating_candidate(self, y: int, x: int, invalidated_value: int):
         for observer in self.observers_invalidating_candidate:
-            observer(x, y, invalidated_value)
+            observer(y, x, invalidated_value)
 
     def notify_preview(self, preview: Preview):
         for observer in self.observers_preview:

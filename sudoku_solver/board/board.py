@@ -2,7 +2,7 @@ import itertools
 from typing import Dict, Tuple, List, Set, Sequence
 import pandas as pd
 
-from sudoku_solver.board.houses import Row, Column, Block, House
+from sudoku_solver.board.houses import Row, Column, Block, House, HouseType
 from sudoku_solver.board.cell import Cell
 from sudoku_solver.board.observable import SudokuObservable
 from sudoku_solver.board.board_constants import HORIZONTAL_INDEXES, VERTICAL_INDEXES
@@ -12,9 +12,9 @@ class Board(SudokuObservable):
     def __init__(self, prefilled_values: Dict[Tuple, int]):
         super().__init__()
         # make sure they're sorted
-        self.rows: Dict[int, Row] = {y: Row(y=y) for y in range(9)}
-        self.columns: Dict[int, Column] = {x: Column(x=x) for x in range(9)}
-        self.blocks: Dict[int, Block] = {z: Block() for z in range(9)}
+        self.rows: Dict[int, Row] = {y: Row(y=y) for y in range(1, 10)}
+        self.columns: Dict[int, Column] = {x: Column(x=x) for x in range(1, 10)}
+        self.blocks: Dict[int, Block] = {z: Block(z=z) for z in range(1, 10)}
 
         self._initialize_cells(prefilled_values=prefilled_values)
 
@@ -22,8 +22,8 @@ class Board(SudokuObservable):
         # loop at all cell positions and instantiate all cells
         cells = []
         for position in itertools.product(HORIZONTAL_INDEXES, VERTICAL_INDEXES):
-            cell = Cell(x=position[0],
-                        y=position[1],
+            cell = Cell(x=position[1],
+                        y=position[0],
                         prefilled_value=prefilled_values.get(position))
             cells.append(cell)
 
@@ -38,22 +38,28 @@ class Board(SudokuObservable):
         assert len(self.columns) == 9
         assert len(self.blocks) == 9
 
+    def get_cell(self, y: int, x: int) -> Cell:
+        all_cells = self.get_cells()
+        cells = [c for c in all_cells if c.x == x and c.y == y]
+        assert len(cells) == 1
+        return cells[0]
+
     def substribe_observer_to_cells(self,
                                     observer_finishing_value: callable,
                                     observer_invalidating_candidate: callable):
-        """subscribe an observer (GUI) to all cells. They will emit changes to values
+        """subscribe an observer (GUI) to all cells. They will emit changes to candidates
         and invalidated candidates"""
-        for cell in self._get_all_cells():
+        for cell in self.get_cells():
             cell.observe_finishing_value(observer=observer_finishing_value)
             cell.observe_invalidating_candidate(observer=observer_invalidating_candidate)
 
-    def as_df(self, mode='values') -> pd.DataFrame:
+    def as_df(self, mode='candidates') -> pd.DataFrame:
         series = {}
         for x, column in self.columns.items():
             series[x] = column.as_series(mode=mode)
         return pd.DataFrame(data=series).sort_index(ascending=False)
 
-    def _get_all_cells(self, only_unsolved: bool = False) -> List[Cell]:
+    def get_cells(self, only_unsolved: bool = False) -> List[Cell]:
         """get list of all cells"""
         cells = [c for block in self.blocks.values() for c in block.get_cells()]
         if not only_unsolved:
@@ -68,39 +74,48 @@ class Board(SudokuObservable):
         """return all cells that have certain candidate;
         optionally filter on cells that have exactly n candidates left
         optionally exclude supplied cells"""
-        all_cells = self._get_all_cells(only_unsolved=True)
-        cells = [c for c in all_cells if c.is_value_candidate(candidate)]
+        all_cells = self.get_cells(only_unsolved=True)
+        cells = [c for c in all_cells if c.has_candidate(candidate)]
         if except_cells:
             cells = [c for c in cells if c not in except_cells]
         if not n_candidates:
             return cells
         else:
-            return [c for c in cells if len(c.possible_values) == n_candidates]
+            return [c for c in cells if len(c.candidates) == n_candidates]
 
-    def get_cells_by_candidates(self, candidates: Sequence[int]):
-        """return all cells that have exactly supplied candidates"""
-        all_cells = self._get_all_cells(only_unsolved=True)
+    def get_cells_by_exact_candidates(self, candidates: Sequence[int]):
+        """return all cells that have <<exactly>> supplied candidates"""
+        all_cells = self.get_cells(only_unsolved=True)
         cells = [c for c in all_cells if c.has_exactly_candidates(candidates=candidates)]
         return cells
 
-    def get_cells_by_number_of_candidates(self, n_candidates: int):
+    def get_cells_having_candidates(self, candidates: Sequence[int], n_candidates: int = None):
+        """return all cells that have at least supplied candidates, i.e. possibly others, too
+        optionally filter on cells that have exactly n candidates left"""
+        all_cells = self.get_cells(only_unsolved=True)
+        cells = [c for c in all_cells if set(c.candidates).issuperset(candidates)]
+        if n_candidates:
+            cells = [c for c in cells if len(c.candidates) == n_candidates]
+        return cells
+
+    def get_cells_by_number_of_candidates(self, n_candidates: int) -> List[Cell]:
         """return all cells that have exactly n candidates left"""
         assert 1 < n_candidates <= 9
-        unsolved_cells = self._get_all_cells(only_unsolved=True)
-        cells = [c for c in unsolved_cells if len(c.possible_values) == n_candidates]
+        unsolved_cells = self.get_cells(only_unsolved=True)
+        cells = [c for c in unsolved_cells if len(c.candidates) == n_candidates]
         return cells
 
     def get_count_remaining_candidates(self):
-        all_cells = self._get_all_cells()
-        remaining = [len(c.possible_values) for c in all_cells if not c.is_solved()]
+        all_cells = self.get_cells()
+        remaining = [len(c.candidates) for c in all_cells if not c.is_solved()]
         return sum(remaining)
 
     def get_count_solved(self):
-        all_cells = self._get_all_cells()
+        all_cells = self.get_cells()
         return len([c for c in all_cells if c.is_solved()])
 
     def get_count_unsolved(self):
-        all_cells = self._get_all_cells()
+        all_cells = self.get_cells()
         return len([c for c in all_cells if not c.is_solved()])
 
     def validate_finished_board(self):
@@ -121,8 +136,14 @@ class Board(SudokuObservable):
         for unit in units:
             unit.validate_consistency()
 
-    def get_all_houses(self) -> List[House]:
+    def get_all_houses(self, house_type: HouseType = None) -> List[House]:
         """returns all rows, cols, and blocks"""
+        if house_type is HouseType.ROW:
+            return list(self.rows.values())
+        elif house_type is HouseType.COL:
+            return list(self.columns.values())
+        elif house_type is HouseType.BLOCK:
+            return list(self.blocks.values())
         return list(self.rows.values()) + list(self.columns.values()) + list(self.blocks.values())  # noqa
 
     @staticmethod
@@ -160,7 +181,7 @@ class Board(SudokuObservable):
         return True
 
     @staticmethod
-    def get_houses_shared_by_cells(cells: Sequence[Cell]):
+    def get_houses_shared_by_cells(cells: Sequence[Cell]) -> List[House]:
         rows = [c.row for c in cells]
         cols = [c.column for c in cells]
         blocks = [c.block for c in cells]
@@ -196,3 +217,7 @@ class Board(SudokuObservable):
         if len(blocks) == 1:
             shared_houses.append(blocks.pop())
         return shared_houses
+
+    @staticmethod
+    def get_distinct_candidates(cells: Sequence[Cell]) -> Set[int]:
+        return set((c for cell in cells for c in cell.candidates))

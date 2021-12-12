@@ -48,7 +48,7 @@ class RemotePair(Preview):
         """get the candidate positions to be invalidated"""
         invalidated: List[Tuple[int, int, int]] = []
         for cell in self.other_cells_to_invalidate:
-            invalidated.extend([(cell.x, cell.y, candidate) for candidate in cell.possible_values
+            invalidated.extend([(cell.x, cell.y, candidate) for candidate in cell.candidates
                                 if candidate in self.candidates])
         return tuple(invalidated)
 
@@ -57,17 +57,17 @@ class RemotePair(Preview):
         positions = []
         for member in [member for member in self.members if member.type == 'odd']:
             positions.extend([(member.cell.x, member.cell.y, candidate, IndicatorLevel.DEFAULT,) for candidate in
-                              member.cell.possible_values])
+                              member.cell.candidates])
 
         for member in [member for member in self.members if member.type == 'even']:
             positions.extend([(member.cell.x, member.cell.y, candidate, IndicatorLevel.ALTERNATIVE,) for candidate in
-                              member.cell.possible_values])
+                              member.cell.candidates])
 
         return tuple(positions)
 
 
 def _is_remote_pair(cells: Sequence[Cell]):
-    assert len(set([tuple(c.possible_values) for c in cells])) == 1
+    assert len(set([tuple(c.candidates) for c in cells])) == 1
     assert len(cells) >= 4
     for i in range(1, len(cells)):
         if not cells[i].is_seen_by_cell(other_cell=cells[i - 1]):
@@ -112,11 +112,11 @@ def find_remote_pair(board: Board):
     often, a longer chain enables invalidating more candidates than a shorter chain"""
     # identify all candidate combinations of two with 4+ cells
     twin_cells = board.get_cells_by_number_of_candidates(n_candidates=2)
-    combinations = [tuple(c.possible_values) for c in twin_cells]
+    combinations = [tuple(c.candidates) for c in twin_cells]
     combinations_min_four = [combi for combi in combinations if combinations.count(combi) >= 4]
     distinct_combinations_min_four = set(combinations_min_four)
     for candidate_combination in distinct_combinations_min_four:
-        combi_cells = [c for c in twin_cells if tuple(c.possible_values) == candidate_combination]
+        combi_cells = [c for c in twin_cells if tuple(c.candidates) == candidate_combination]
 
         # find remote pairs for current combination of two candidates (and their cells)
         remote_pairs = _find_remote_pairs_for_candidate_combination(candidates=candidate_combination,

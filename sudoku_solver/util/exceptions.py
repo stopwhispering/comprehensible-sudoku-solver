@@ -1,0 +1,2 @@
+class ChainError(Exception):
+    pass

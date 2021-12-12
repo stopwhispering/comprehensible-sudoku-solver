@@ -1,5 +1,7 @@
 from sudoku_solver.solver.almost_locked_sets import find_singly_or_doubly_linked_als
-from sudoku_solver.solver.nice_loop import find_discontinuous_nice_loop
+from sudoku_solver.solver.empty_rectangle import find_empty_rectangle
+from sudoku_solver.solver.nice_loop import find_nice_loop
+from sudoku_solver.solver.sue_de_coq import find_sue_de_coq
 from sudoku_solver.solver.two_string_kite import find_two_string_kite
 from sudoku_solver.solver.remote_pair import find_remote_pair
 from sudoku_solver.board.board import Board
@@ -9,6 +11,7 @@ from sudoku_solver.solver.hidden_subset import find_hidden_subset
 from sudoku_solver.solver.naked_subset import find_naked_subset
 from sudoku_solver.solver.locked_candidate import find_locked_candidate
 from sudoku_solver.solver.skyscraper import find_skyscraper
+from sudoku_solver.solver.uniqueness import find_uniqueness_violations
 from sudoku_solver.solver.w_wing import find_w_wing
 from sudoku_solver.solver.xy_z_wing import find_xy_wing, find_xyz_wing
 
@@ -16,7 +19,7 @@ from sudoku_solver.solver.xy_z_wing import find_xy_wing, find_xyz_wing
 
 def get_algo_invalidate_solved_values(board: Board):
     """
-    simple invalidator: iterate through rows, cols, packages and invalidate yet-solved values
+    simple invalidator: iterate through rows, cols, packages and invalidate yet-solved candidates
     """
     def invalidate_solved_values():
         for unit in board.get_all_houses():
@@ -28,7 +31,7 @@ def get_algo_invalidate_solved_values(board: Board):
 
 def get_algo_find_single_candidates(board: Board):
     """
-    simple solver: if in a row, col, or block, only one cell has a specific candidate, we can set that cell/value as
+    simple solver: if in a row, col, or block, only one cell has a specific candidate, we can set that cell/candidate as
     solved
     """
 
@@ -67,9 +70,9 @@ def get_algo_locked_candidate(board: Board):
 
 
 def get_algo_hidden_subset(board: Board):
-    """if three candidate values are valid for only three cells (although they
+    """if three candidate candidates are valid for only three cells (although they
     don't need to each have all of them),
-    then we can rule out all other candidate values for these cells. Example:
+    then we can rule out all other candidate candidates for these cells. Example:
     123 are candidates for only 1357, 1259, 2357 -> make them 13, 12, 23"""
     def identify_hidden_subset():
         get_algo_invalidate_solved_values(board=board)()
@@ -127,7 +130,7 @@ def get_algo_discontinuous_nice_loop(board: Board):
     """apply the discontinuous nice loop logic"""
     def identify_discontinuous_nice_loop():
         get_algo_invalidate_solved_values(board=board)()
-        find_discontinuous_nice_loop(board=board)
+        find_nice_loop(board=board)
         board.validate_consistency_in_all_houses()
     return identify_discontinuous_nice_loop
 
@@ -185,3 +188,30 @@ def get_algo_w_wing(board: Board):
         find_w_wing(board=board)
         board.validate_consistency_in_all_houses()
     return identify_w_wing
+
+
+def get_algo_uniqueness_violations(board: Board):
+    """find uniqueness violations algorithm (unique rectangle types)"""
+    def identify_uniqueness_violations():
+        get_algo_invalidate_solved_values(board=board)()
+        find_uniqueness_violations(board=board)
+        board.validate_consistency_in_all_houses()
+    return identify_uniqueness_violations
+
+
+def get_algo_sue_de_coq(board: Board):
+    """find sue de coq algorithm"""
+    def identify_sue_de_coq():
+        get_algo_invalidate_solved_values(board=board)()
+        find_sue_de_coq(board=board)
+        board.validate_consistency_in_all_houses()
+    return identify_sue_de_coq
+
+
+def get_algo_empty_rectangle(board: Board):
+    """find empty rectangle algorithm"""
+    def identify_empty_rectangle():
+        get_algo_invalidate_solved_values(board=board)()
+        find_empty_rectangle(board=board)
+        board.validate_consistency_in_all_houses()
+    return identify_empty_rectangle

@@ -19,7 +19,7 @@ class CandidateRectangle:
 
     @property
     def n(self) -> int:
-        return self.candidate - 1
+        return self.candidate
 
     @property
     def x(self) -> int:
@@ -32,10 +32,11 @@ class CandidateRectangle:
     @property
     def ui_coords(self) -> Tuple[float, float, float, float]:
         """return edges: x0, y0, x1, y1"""
-        return get_candidate_rectangle_coords(self.x, self.y, self.n)
+        return get_candidate_rectangle_coords(y=self.y, x=self.x, candidate=self.candidate)
 
     def paint_bg(self, color: COLOR):
         self.remove_bg()
+        coords = self.ui_coords
         self.id_bg_color = self.canvas.create_rectangle(*self.ui_coords, fill=color.value, width=0)
 
     def paint_preview_overlay(self, color: COLOR) -> int:
@@ -66,15 +67,15 @@ class CandidateRectangle:
 
 @dataclass
 class ValueRectangle:
-    x: int
     y: int
+    x: int
     canvas: tkinter.Canvas
     candidate_rectangles: Dict[int, CandidateRectangle] = field(default_factory=dict)  # wtf dataclasses...?!
 
     @property
     def ui_center_coords(self) -> Tuple[float, float]:
         """return pixel position of rectangle center (for writing text)"""
-        return board_position_to_coords(self.x, self.y)
+        return board_position_to_coords(self.y, self.x)
 
     def remove_grid_candidates_for_cell(self):
         # remove all candidate sub-rectangles, i.e. remove bg color and text
@@ -84,7 +85,7 @@ class ValueRectangle:
             candidate_rectangle.possible = False
 
     def write_value_found(self, value: int, color: COLOR):
-        pos_x, pos_y = self.ui_center_coords
+        pos_y, pos_x = self.ui_center_coords
         self.canvas.create_text(pos_x,
                                 pos_y,
                                 text=value,
