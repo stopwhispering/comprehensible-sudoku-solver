@@ -132,7 +132,6 @@ def find_singly_or_doubly_linked_als(board: Board):
 
         rcc, other_common_candidates = get_rcc_for_als_combination(board=board, als_combination=als_combination)
 
-        # todo is it valid to just take the first common candidate here or do we need exactly one????
         if len(rcc) == 1 and other_common_candidates:  # and len(other_common_candidates) == 1:
             singly_linked_als = _check_singly_linked_als(board=board,
                                                          als_combination=als_combination,

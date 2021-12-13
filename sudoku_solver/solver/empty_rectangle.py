@@ -63,7 +63,6 @@ def find_empty_rectangle(board: Board):
                 board.notify_preview(preview=empty_rectangle)
                 return
 
-            # todo avoid repeating, this looks really ugy...
             for cell_on_col in cells_on_col:
                 cells_same_row = cell_on_col.row.get_cells_having_candidate(candidate=candidate,
                                                                             except_cells=[cell_on_col])

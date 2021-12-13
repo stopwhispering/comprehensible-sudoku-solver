@@ -194,7 +194,7 @@ def _extend_xy_chain(board: Board, chain: XYChain) -> XYChain:
 
 
 def find_xy_chain(board: Board):
-    """todo"""
+    """XY Chain Strategy"""
     for starting_candidate in range(1, 10):
         cells = board.get_cells_by_candidate(candidate=starting_candidate,
                                              n_candidates=2)

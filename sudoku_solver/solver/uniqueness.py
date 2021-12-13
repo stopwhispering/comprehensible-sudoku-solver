@@ -179,15 +179,14 @@ def find_uniqueness_violations(board: Board):
     A UR (which would be a "bug" in the sudoku making it have multiple solutions) consists of
     four cells that occupy exactly two rows, two columns, and two blocks. All four cells have the same two candidates.
     """
-    # todo
-    # uniqueness_violation = _find_unique_rectangles_type_1(board=board)
-    # if uniqueness_violation:
-    #     board.notify_preview(preview=uniqueness_violation)
-    #     return
-    # uniqueness_violation = _find_unique_rectangles_type_2(board=board)
-    # if uniqueness_violation:
-    #     board.notify_preview(preview=uniqueness_violation)
-    #     return
+    uniqueness_violation = _find_unique_rectangles_type_1(board=board)
+    if uniqueness_violation:
+        board.notify_preview(preview=uniqueness_violation)
+        return
+    uniqueness_violation = _find_unique_rectangles_type_2(board=board)
+    if uniqueness_violation:
+        board.notify_preview(preview=uniqueness_violation)
+        return
     uniqueness_violation = _find_unique_rectangles_type_4(board=board)
     if uniqueness_violation:
         board.notify_preview(preview=uniqueness_violation)

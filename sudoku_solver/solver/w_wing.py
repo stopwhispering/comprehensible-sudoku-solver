@@ -5,8 +5,7 @@ from sudoku_solver.board.preview import IndicatorLevel, CommonPreview
 
 
 def find_w_wing(board: Board):
-    """todo
-    """
+    """W-Wing Strategy"""
     # find combinations of two cells, both having the same two candidates ("W" and "Z"); both cells may not be in
     # the same house
 

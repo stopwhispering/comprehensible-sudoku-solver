@@ -32,7 +32,7 @@ def _extend_chain_to_loop(cell_in: Cell, chain: Chain) -> Optional[CommonPreview
             # we have a discontinuous or continuous nice loop
             # in both cases, we may likely invalidate some candidate(s)
             if not chain.empty and cell_out is chain.starting_cell:
-                #     # todo <<continuous>> nice loop (must have even number of nodes)
+                # todo <<continuous>> nice loop (very rare)
 
                 chain.add_link(link)
                 # discontinuous nice loop
@@ -59,7 +59,7 @@ def _extend_chain_to_loop(cell_in: Cell, chain: Chain) -> Optional[CommonPreview
 
 
 def find_nice_loop(board: Board):
-    """todo"""
+    """Nice Loop Strategy, currently only <<discontinuous>> version implemented"""
     # start with <<any>> unsolved cell
     chain = Chain()
     cells = board.get_cells(only_unsolved=True)

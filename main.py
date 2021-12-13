@@ -1,7 +1,8 @@
-from sudoku_solver.solver.algorithms import get_algo_remote_pair, get_algo_two_string_kite, get_algo_xyz_wing, \
-    get_algo_locked_candidate, get_algo_singly_or_doubly_linked_als, get_algo_w_wing, get_algo_discontinuous_nice_loop, \
-    get_algo_uniqueness_violations, get_algo_sue_de_coq, get_algo_empty_rectangle
-from sudoku_solver.solver.algorithms import (get_algo_hidden_subset,
+from sudoku_solver.solver.algorithms import (get_algo_remote_pair, get_algo_two_string_kite, get_algo_xyz_wing,
+                                             get_algo_locked_candidate, get_algo_singly_or_doubly_linked_als,
+                                             get_algo_w_wing, get_algo_discontinuous_nice_loop,
+                                             get_algo_uniqueness_violations, get_algo_sue_de_coq,
+                                             get_algo_empty_rectangle, get_algo_hidden_subset,
                                              get_algo_naked_subset,
                                              get_algo_find_single_candidates, get_algo_invalidate_solved_values,
                                              get_algo_invalidate_with_n_fish,

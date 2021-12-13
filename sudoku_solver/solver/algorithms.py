@@ -15,8 +15,8 @@ from sudoku_solver.solver.uniqueness import find_uniqueness_violations
 from sudoku_solver.solver.w_wing import find_w_wing
 from sudoku_solver.solver.xy_z_wing import find_xy_wing, find_xyz_wing
 
-# todo decorate instead of reapeating....
 
+# todo decorate instead of reapeating....
 def get_algo_invalidate_solved_values(board: Board):
     """
     simple invalidator: iterate through rows, cols, packages and invalidate yet-solved candidates
