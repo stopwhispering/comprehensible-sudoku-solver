@@ -10,8 +10,14 @@ Comprehensible Sudoku Solver implements some standard strategies to solve diffic
 - XY-Chain
 - Remote Pair
 - 2-String Kite
+- Empty Rectangle
 - XY-Wing
 - XYZ-Wing
+- W-Wing
+- Singly- or doubly-linked Almost-Locked Set
+- Discontinuous Nice Loop
+- Unique Rectangles (Types I, II, IV)
+- Sue de Coq
 
 ![Screenshot](./static/screenshot.png)
 

@@ -2,7 +2,7 @@ from typing import Dict, Tuple
 
 
 
-# not solved, yet
+# solved, finally
 SUDOKU = (
     '       2 ',
     '  64  13 ',
@@ -14,6 +14,18 @@ SUDOKU = (
     '        8',
     ' 7   5   ',
     )
+
+# SUDOKU = (
+#     '7   9   8',
+#     '952 8 1',
+#     '  1  6  9',
+#     '   9   54',
+#     '   5 2',
+#     '59   4',
+#     '3  7  8',
+#     '  9 5 716',
+#     '8   2   5',
+# )
 
 # empty rectangle 2
 # SUDOKU = (
