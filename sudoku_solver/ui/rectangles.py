@@ -1,6 +1,7 @@
 from __future__ import annotations
 from dataclasses import dataclass, field
 import tkinter
+from tkinter import font
 from typing import Tuple, Dict
 
 from sudoku_solver.ui.coordinates import get_candidate_rectangle_coords, board_position_to_coords
@@ -88,4 +89,4 @@ class ValueRectangle:
                                 pos_y,
                                 text=value,
                                 fill=color.value,
-                                font=tkinter.font.Font(size=VALUE_FONT_SIZE, weight='bold'))
+                                font=font.Font(size=VALUE_FONT_SIZE, weight='bold'))

@@ -16,7 +16,7 @@ class RemotePairMember:
 
 
 class RemotePair(Preview):
-    def __init__(self, candidates: Sequence[int, int]):
+    def __init__(self, candidates: Sequence[int]):
         self.candidates = candidates
         self.members: List[RemotePairMember] = []
         self.other_cells_to_invalidate: Set = set()
@@ -76,7 +76,7 @@ def _is_remote_pair(cells: Sequence[Cell]):
     return True
 
 
-def _find_remote_pairs_for_candidate_combination(candidates: Sequence[int, int],
+def _find_remote_pairs_for_candidate_combination(candidates: Sequence[int],
                                                  combi_cells: List[Cell]) -> List[Tuple[RemotePair, int]]:
     # build longest chain by testing all cell orders (and all lengths 4+)
     assert len(combi_cells) >= 4
