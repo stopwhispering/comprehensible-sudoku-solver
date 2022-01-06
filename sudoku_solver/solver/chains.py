@@ -4,7 +4,9 @@ from typing import List, Set, Tuple
 from sudoku_solver.board.board import Board
 from sudoku_solver.board.cell import Cell
 from sudoku_solver.board.board_constants import LinkType
-from sudoku_solver.board.preview import Preview, IndicatorLevel
+from sudoku_solver.shared.preview import Preview, IndicatorLevel
+# from sudoku_solver.solver.decorators import evaluate_algorithm
+from sudoku_solver.solver.decorators import evaluate_algorithm
 
 
 @dataclass
@@ -60,11 +62,12 @@ def extend_x_chain(board: Board, chain: List[Cell], candidate: int) -> XChain:
         return cells_to_invalidate_candidate
 
 
+@evaluate_algorithm
 def find_x_chain(board: Board):
     """apply the x-chain logic
     - an x-chain has an even number of chained cells
     - odd links must be strong links, even links may be weak links (but can also be strong links)
-    - either the starting or the ending cell has the candidate as it's candidate. therefore, all cells which are
+    - either the starting or the ending cell has the candidate as its candidate. therefore, all cells which are
         not part of the chain and which can see the both the starting and ending cell, may <<not>> have the
         candidate.
     """
@@ -193,6 +196,7 @@ def _extend_xy_chain(board: Board, chain: XYChain) -> XYChain:
             chain.pop()
 
 
+@evaluate_algorithm
 def find_xy_chain(board: Board):
     """XY Chain Strategy"""
     for starting_candidate in range(1, 10):

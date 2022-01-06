@@ -1,7 +1,8 @@
 import itertools
 
 from sudoku_solver.board.board import Board
-from sudoku_solver.board.preview import CommonPreview, IndicatorLevel, Preview
+from sudoku_solver.shared.preview import CommonPreview, IndicatorLevel, Preview
+from sudoku_solver.solver.decorators import evaluate_algorithm
 
 
 def _find_unique_rectangles_type_1(board: Board) -> Preview:
@@ -111,7 +112,7 @@ def _find_unique_rectangles_type_2(board: Board) -> Preview:
 
 def _find_unique_rectangles_type_4(board: Board) -> Preview:
     """
-    once again look at additional candidates in two non diagonal cells (cf. type II; here, they don't need to match,
+    once again look at additional candidates in two non-diagonal cells (cf. type II; here, they don't need to match,
     though). If one of the UR  candidates
     is not possible anymore in any other cell of a house that contains both cells with the extra candidates,
     the other UR candidate can be eliminated from those UR cells.
@@ -174,9 +175,10 @@ def _find_unique_rectangles_type_4(board: Board) -> Preview:
                         return ur_type_4
 
 
+@evaluate_algorithm
 def find_uniqueness_violations(board: Board):
     """
-    A UR (which would be a "bug" in the sudoku making it have multiple solutions) consists of
+    A UR (which would be a "bug" in the sudoku_rows making it have multiple solutions) consists of
     four cells that occupy exactly two rows, two columns, and two blocks. All four cells have the same two candidates.
     """
     uniqueness_violation = _find_unique_rectangles_type_1(board=board)

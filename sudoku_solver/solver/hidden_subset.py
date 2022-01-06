@@ -1,17 +1,18 @@
 import itertools
-from typing import Optional, List, Tuple
+from typing import Optional, Tuple, Sequence
 
 from sudoku_solver.board.board import Board
 from sudoku_solver.board.cell import Cell
 from sudoku_solver.board.houses import House
-from sudoku_solver.board.preview import Preview, IndicatorLevel
+from sudoku_solver.shared.preview import Preview, IndicatorLevel
+from sudoku_solver.solver.decorators import evaluate_algorithm
 
 
 class HiddenSubset(Preview):
     def __init__(self,
-                 candidates: List[int],
-                 hidden_cells: List[Cell], ):
-        self.candidates: List[int] = candidates
+                 candidates: Sequence[int],
+                 hidden_cells: Sequence[Cell], ):
+        self.candidates = candidates
         self.hidden_cells = hidden_cells
 
     def get_indicator_candidates(self) -> Tuple[Tuple[int, int, int, IndicatorLevel]]:
@@ -53,6 +54,7 @@ def identify_hidden_subset_in_house(house: House) -> Optional[HiddenSubset]:
                 return hidden_subset
 
 
+@evaluate_algorithm
 def find_hidden_subset(board: Board):
     """if three candidate candidates are valid for only three cells (although they
     don't need to each have all of them),

@@ -1,9 +1,11 @@
 import itertools
 
 from sudoku_solver.board.board import Board
-from sudoku_solver.board.preview import IndicatorLevel, CommonPreview
+from sudoku_solver.shared.preview import IndicatorLevel, CommonPreview
+from sudoku_solver.solver.decorators import evaluate_algorithm
 
 
+@evaluate_algorithm
 def find_xy_wing(board: Board):
     """Starting with a cell ("pivot") that has two candidates ("X" and "Y"), we look out for two another
     cells ("Pincers") with two candidates each: X+Z and Y+Z, Z being any other candidate. Both pincer cells may not
@@ -52,6 +54,7 @@ def find_xy_wing(board: Board):
                 return
 
 
+@evaluate_algorithm
 def find_xyz_wing(board: Board):
     """Starting with a cell ("pivot") that has three candidates ("X", "Y", "Z"), we look out for two another
     cells ("Pincers") with two candidates each: X+Z and Y+Z. Both pincer cells may not

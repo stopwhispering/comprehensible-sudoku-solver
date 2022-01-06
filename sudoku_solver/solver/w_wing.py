@@ -1,9 +1,11 @@
 import itertools
 
 from sudoku_solver.board.board import Board
-from sudoku_solver.board.preview import IndicatorLevel, CommonPreview
+from sudoku_solver.shared.preview import IndicatorLevel, CommonPreview
+from sudoku_solver.solver.decorators import evaluate_algorithm
 
 
+@evaluate_algorithm
 def find_w_wing(board: Board):
     """W-Wing Strategy"""
     # find combinations of two cells, both having the same two candidates ("W" and "Z"); both cells may not be in
@@ -32,9 +34,9 @@ def find_w_wing(board: Board):
             # in house of pincer cell 2
             # the two pivot cells must be in the same house and must be the only cells having candidate W in that house
             w_cells_a = [c for c in w_cells_all
-                        if c.is_seen_by_cell(pincer_cells[0]) and not c.is_seen_by_cell(pincer_cells[1])]
+                         if c.is_seen_by_cell(pincer_cells[0]) and not c.is_seen_by_cell(pincer_cells[1])]
             w_cells_b = [c for c in w_cells_all
-                        if c.is_seen_by_cell(pincer_cells[1]) and not c.is_seen_by_cell(pincer_cells[0])]
+                         if c.is_seen_by_cell(pincer_cells[1]) and not c.is_seen_by_cell(pincer_cells[0])]
 
             w_cells_combinations = tuple(itertools.product(w_cells_a, w_cells_b))
             for pivot_cells in w_cells_combinations:
@@ -55,7 +57,8 @@ def find_w_wing(board: Board):
                     indicator_candidates = []
                     for pincer_cell in pincer_cells:
                         indicator_candidates.append((pincer_cell.x, pincer_cell.y, candidate_w, IndicatorLevel.DEFAULT))
-                        indicator_candidates.append((pincer_cell.x, pincer_cell.y, candidate_z, IndicatorLevel.ALTERNATIVE))
+                        indicator_candidates.append(
+                                (pincer_cell.x, pincer_cell.y, candidate_z, IndicatorLevel.ALTERNATIVE))
                     for pivot_cell in pivot_cells:
                         indicator_candidates.append((pivot_cell.x, pivot_cell.y, candidate_w, IndicatorLevel.DEFAULT))
                     w_wing = CommonPreview(invalidated_cells=invalidated_cells,

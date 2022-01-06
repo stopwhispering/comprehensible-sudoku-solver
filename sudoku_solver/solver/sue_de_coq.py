@@ -3,7 +3,8 @@ from typing import Optional
 
 from sudoku_solver.board.board import Board
 from sudoku_solver.board.houses import Block, HouseType, House
-from sudoku_solver.board.preview import Preview, IndicatorLevel, CommonPreview
+from sudoku_solver.shared.preview import Preview, IndicatorLevel, CommonPreview
+from sudoku_solver.solver.decorators import evaluate_algorithm
 
 
 def _find_sue_de_coq_in_intersection(board: Board,
@@ -74,13 +75,14 @@ def _find_sue_de_coq_in_intersection(board: Board,
         return sue_de_coq
 
 
+@evaluate_algorithm
 def find_sue_de_coq(board: Board):
     """we look at each intersection (3 cells) of a block and a row/col:
     - we need either two cells containing (together) 4 distinct candidates or
         three cells containing (together) 5 distinct candidates
     - now we need to find two bi-value cells:
-        a. one in the row/col outside of the intersection/block
-        b. one in the block outside of the intersection/row/col
+        a. one in the row/col outside the intersection/block
+        b. one in the block outside the intersection/row/col
     - the two bi-value cells' candidates must be drawn entirely from the
         4/5 candidates above
     - the two bi-value cells must have disjunct candidates

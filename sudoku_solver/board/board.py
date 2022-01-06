@@ -1,15 +1,16 @@
 import itertools
-from typing import Dict, Tuple, List, Set, Sequence
+from typing import Dict, List, Set, Sequence
 import pandas as pd
 
 from sudoku_solver.board.houses import Row, Column, Block, House, HouseType
 from sudoku_solver.board.cell import Cell
 from sudoku_solver.board.observable import SudokuObservable
 from sudoku_solver.board.board_constants import HORIZONTAL_INDEXES, VERTICAL_INDEXES
+from sudoku_solver.shared.puzzle import SudokuPuzzle
 
 
 class Board(SudokuObservable):
-    def __init__(self, prefilled_values: Dict[Tuple, int]):
+    def __init__(self, prefilled_values: SudokuPuzzle):
         super().__init__()
         # make sure they're sorted
         self.rows: Dict[int, Row] = {y: Row(y=y) for y in range(1, 10)}
@@ -18,13 +19,13 @@ class Board(SudokuObservable):
 
         self._initialize_cells(prefilled_values=prefilled_values)
 
-    def _initialize_cells(self, prefilled_values: Dict[Tuple, int]):
+    def _initialize_cells(self, prefilled_values: SudokuPuzzle):
         # loop at all cell positions and instantiate all cells
         cells = []
         for position in itertools.product(HORIZONTAL_INDEXES, VERTICAL_INDEXES):
             cell = Cell(x=position[1],
                         y=position[0],
-                        prefilled_value=prefilled_values.get(position))
+                        prefilled_value=prefilled_values.get(x=position[1], y=position[0]))
             cells.append(cell)
 
         # fill cells into their respective row, column, and block

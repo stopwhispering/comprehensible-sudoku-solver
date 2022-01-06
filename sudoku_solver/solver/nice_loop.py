@@ -2,9 +2,10 @@ from typing import Optional
 
 from sudoku_solver.board.board import Board
 from sudoku_solver.board.cell import Cell
-from sudoku_solver.board.preview import CommonPreview
+from sudoku_solver.shared.preview import CommonPreview
 from sudoku_solver.solver.common.chains import Chain
 from sudoku_solver.solver.common.links import create_link
+from sudoku_solver.solver.decorators import evaluate_algorithm
 from sudoku_solver.solver.solver_constants import NICE_LOOP_MAX_LINKS
 
 
@@ -17,7 +18,7 @@ def _extend_chain_to_loop(cell_in: Cell, chain: Chain) -> Optional[CommonPreview
             return
     else:
         # with any seen cell/candidate, out cell_in can at least form a weak link
-        # note: a cell may be in the chain only once with the exception of the starting cell
+        # note: a cell may be in the chain only once except for the starting cell
         seen_cells.extend(cell_in.seen_by_any_of_candidates(candidates=cell_in.candidates,
                                                             except_cells=chain.cells))
 
@@ -58,6 +59,7 @@ def _extend_chain_to_loop(cell_in: Cell, chain: Chain) -> Optional[CommonPreview
                     chain.pop_link()
 
 
+@evaluate_algorithm
 def find_nice_loop(board: Board):
     """Nice Loop Strategy, currently only <<discontinuous>> version implemented"""
     # start with <<any>> unsolved cell

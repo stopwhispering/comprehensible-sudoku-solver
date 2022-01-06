@@ -3,7 +3,8 @@ from typing import List, Tuple
 
 from sudoku_solver.board.board import Board
 from sudoku_solver.board.cell import Cell
-from sudoku_solver.board.preview import Preview, IndicatorLevel
+from sudoku_solver.shared.preview import Preview, IndicatorLevel
+from sudoku_solver.solver.decorators import evaluate_algorithm
 
 
 class TwoStringKite(Preview):
@@ -42,6 +43,7 @@ class TwoStringKite(Preview):
             cell.flag_candidates_invalid([self.candidate])
 
 
+@evaluate_algorithm
 def find_two_string_kite(board: Board):
     """we need a row and a colum, both having a specific candidate exactly two times. additionally,
     one candidate each must be in the same block."""

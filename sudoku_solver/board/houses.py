@@ -65,7 +65,7 @@ class House:
         return [v for v in all_values if v not in finished_values]
 
     def invalidate_solved_values(self):
-        """invalidate solved candidates from this row/column/block as invalid in all other cells"""
+        """invalidate solved candidates from this row/column/block in other cells"""
         values = self.get_finished_values()
         unsolved_cells = self.get_cells(only_unsolved=True)
         for value in values:
@@ -169,19 +169,19 @@ class House:
         return cells
 
     @staticmethod
-    def cells_in_same_row(cells: Sequence[Cell]):
+    def cells_in_same_row(cells: Sequence[Cell]) -> bool:
         """returns true if all supplied cells are in the same row"""
         rows = [c.row for c in cells]
         return len(set(rows)) == 1
 
     @staticmethod
-    def cells_in_same_col(cells: Sequence[Cell]):
+    def cells_in_same_col(cells: Sequence[Cell]) -> bool:
         """returns true if all supplied cells are in the same column"""
         cols = [c.column for c in cells]
         return len(set(cols)) == 1
 
     @staticmethod
-    def cells_in_same_block(cells: Sequence[Cell]):
+    def cells_in_same_block(cells: Sequence[Cell]) -> bool:
         """returns true if all supplied cells are in the same block"""
         blocks = [c.block for c in cells]
         return len(set(blocks)) == 1
@@ -230,13 +230,5 @@ class Block(House):
         self.cells[(cell.x, cell.y)] = cell
         cell.set_block(block=self)
 
-    def get_crossing_houses(self, house_type: HouseType = None) -> Set[House]:
-        if house_type:
-            if house_type is HouseType.ROW:
-                rows = set([c.row for c in self.get_cells()])
-            elif house_type is HouseType.COL:
-                cols = set([c.column for c in self.get_cells()])
-            else:
-                raise TypeError('No valid House Type')
+    def get_crossing_houses(self) -> Set[House]:
         return set([c.row for c in self.get_cells()] + [c.column for c in self.get_cells()])
-

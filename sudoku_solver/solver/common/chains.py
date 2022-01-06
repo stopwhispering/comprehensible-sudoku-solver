@@ -1,7 +1,7 @@
 from typing import List, Union, Tuple
 
 from sudoku_solver.board.cell import Cell
-from sudoku_solver.board.preview import PreviewArrow, PreviewPosition, IndicatorLevel
+from sudoku_solver.shared.preview import PreviewArrow, PreviewPosition, IndicatorLevel
 from sudoku_solver.util.exceptions import ChainError
 from sudoku_solver.solver.common.links import Link, StrongLink, WeakLink
 
@@ -128,7 +128,7 @@ class Chain:
 
         # If a node has two weak links, the cell must be two-valued and the digits must be different
         elif isinstance(link_in, WeakLink) and isinstance(link_out, WeakLink):
-            return node.count_of_candidates == 2 and link_in.candidate != link_out.candidate
+            return node.count_candidates == 2 and link_in.candidate != link_out.candidate
 
         # If a node has two different links (one weak, one strong), the digits must be the same
         elif type(link_in) in (StrongLink, WeakLink) and type(link_out) in (StrongLink, WeakLink):

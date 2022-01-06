@@ -1,6 +1,7 @@
 from sudoku_solver.board.board import Board
 from sudoku_solver.board.houses import House, Block, Column, Row
-from sudoku_solver.board.preview import CommonPreview, IndicatorLevel
+from sudoku_solver.shared.preview import CommonPreview, IndicatorLevel
+from sudoku_solver.solver.decorators import evaluate_algorithm
 
 
 def _find_locked_candidate_in_house(house: House) -> CommonPreview:
@@ -35,6 +36,7 @@ def _find_locked_candidate_in_house(house: House) -> CommonPreview:
             return locked_candidate
 
 
+@evaluate_algorithm
 def find_locked_candidate(board: Board):
     """in a house, look for all cells having a specific candidate
        a. if we're in a box, test if all these cells are in a single row or column

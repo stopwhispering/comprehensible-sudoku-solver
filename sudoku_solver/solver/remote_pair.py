@@ -4,7 +4,8 @@ from typing import Sequence, Set, List, Tuple
 
 from sudoku_solver.board.board import Board
 from sudoku_solver.board.cell import Cell
-from sudoku_solver.board.preview import Preview, IndicatorLevel
+from sudoku_solver.shared.preview import Preview, IndicatorLevel
+from sudoku_solver.solver.decorators import evaluate_algorithm
 
 
 @dataclass
@@ -15,7 +16,7 @@ class RemotePairMember:
 
 
 class RemotePair(Preview):
-    def __init__(self, candidates: Tuple[int, int]):
+    def __init__(self, candidates: Sequence[int, int]):
         self.candidates = candidates
         self.members: List[RemotePairMember] = []
         self.other_cells_to_invalidate: Set = set()
@@ -75,9 +76,9 @@ def _is_remote_pair(cells: Sequence[Cell]):
     return True
 
 
-def _find_remote_pairs_for_candidate_combination(candidates: Tuple[int, int],
+def _find_remote_pairs_for_candidate_combination(candidates: Sequence[int, int],
                                                  combi_cells: List[Cell]) -> List[Tuple[RemotePair, int]]:
-    # build longest possible chain by testing all cell orders (and all lengths 4+)
+    # build longest chain by testing all cell orders (and all lengths 4+)
     assert len(combi_cells) >= 4
     remote_pairs: List[Tuple[RemotePair, int]] = []
 
@@ -105,6 +106,7 @@ def _find_remote_pairs_for_candidate_combination(candidates: Tuple[int, int],
     return remote_pairs
 
 
+@evaluate_algorithm
 def find_remote_pair(board: Board):
     """we need a chain of 4+ cells each with the same (exactly) two candidates; consider each of these cells
     to have an odd number or an even number; we may then invalidate the two candidates from each other (i.e.

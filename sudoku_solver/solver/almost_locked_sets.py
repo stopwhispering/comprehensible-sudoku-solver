@@ -4,7 +4,8 @@ from typing import List, Tuple, Sequence, Optional
 
 from sudoku_solver.board.board import Board
 from sudoku_solver.board.cell import Cell
-from sudoku_solver.board.preview import CommonPreview, IndicatorLevel
+from sudoku_solver.shared.preview import CommonPreview, IndicatorLevel
+from sudoku_solver.solver.decorators import evaluate_algorithm
 
 
 def find_almost_locked_sets(board: Board, max_size: int = 3) -> List[Tuple[Cell, ...]]:
@@ -31,8 +32,8 @@ def find_almost_locked_sets(board: Board, max_size: int = 3) -> List[Tuple[Cell,
 
 def get_rcc_for_als_combination(board: Board, als_combination: Tuple[Tuple[Cell, ...], ...]) -> Tuple[List[int],
                                                                                                       List[int]]:
-    """return restricted common candidates (rcc) (0..n) plus other common candidates (0..n)
-    an rcc can be true for only one almost locked set of two"""
+    """return restricted common candidates (rcc) (0...n) plus other common candidates (0...n)
+    a rcc can be true for only one almost locked set of two"""
     possible_values_a = set([candidate for cell in als_combination[0] for candidate in cell.candidates])
     possible_values_b = set([candidate for cell in als_combination[1] for candidate in cell.candidates])
     common_candidates = possible_values_a.intersection(possible_values_b)
@@ -41,7 +42,7 @@ def get_rcc_for_als_combination(board: Board, als_combination: Tuple[Tuple[Cell,
 
     rcc = []
     for common_candidate in common_candidates:
-        # we only have an rcc, if all cells having that candidate see each other
+        # we only have a rcc, if all cells having that candidate see each other
         cells_a = [cell for cell in als_combination[0] if cell.has_candidate(common_candidate)]
         cells_b = [cell for cell in als_combination[1] if cell.has_candidate(common_candidate)]
         assert cells_a and cells_b
@@ -58,7 +59,7 @@ def get_rcc_for_als_combination(board: Board, als_combination: Tuple[Tuple[Cell,
 
 
 def _check_singly_linked_als(board: Board,
-                             als_combination: Tuple[Tuple[Cell, ...]],
+                             als_combination: Tuple[Tuple[Cell, ...], Tuple[Cell, ...]],
                              rcc: int,
                              other_common_candidate: int) -> Optional[CommonPreview]:
     # we can not invalidate the other common candidate from all non-als cells that see the als-cells having
@@ -87,7 +88,7 @@ def _check_singly_linked_als(board: Board,
 
 
 def _check_doubly_linked_als(board: Board,
-                             als_combination: Tuple[Tuple[Cell, ...]],
+                             als_combination: Tuple[Tuple[Cell, ...], Tuple[Cell, ...]],
                              rcc: Sequence[int]) -> Optional[CommonPreview]:
     invalidate_cells = defaultdict(list)
     for rcc_candidate in rcc:
@@ -119,6 +120,7 @@ def _check_doubly_linked_als(board: Board,
         return doubly_linked_als
 
 
+@evaluate_algorithm
 def find_singly_or_doubly_linked_als(board: Board):
     als = find_almost_locked_sets(board=board)
 

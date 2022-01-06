@@ -4,7 +4,8 @@ from typing import List, Tuple
 from sudoku_solver.board.board import Board
 from sudoku_solver.board.cell import Cell
 from sudoku_solver.board.houses import House
-from sudoku_solver.board.preview import Preview, IndicatorLevel
+from sudoku_solver.shared.preview import Preview, IndicatorLevel
+from sudoku_solver.solver.decorators import evaluate_algorithm
 
 
 class NakedSubset(Preview):
@@ -58,8 +59,12 @@ def _identify_naked_subset_in_house(house: House, n_cand: Tuple[int, ...]) -> Na
                         return naked_pair
 
 
+@evaluate_algorithm
 def find_naked_subset(board: Board):
-    """generalization of naked pair (triples, quadruples, etc.)"""
+    """generalization of naked pair (triples, quadruples, etc.)
+    Example: if three cells together share the same 3 candidates (although they don't need to have them all),
+    then we can rule these candidates out for other cells of the unit. Example:
+    (39), (59), (359) -> other cells may not have 359"""
     for house in board.get_all_houses():
         naked_subset = _identify_naked_subset_in_house(house=house, n_cand=(2, 3, 4, 5,))
         if naked_subset:

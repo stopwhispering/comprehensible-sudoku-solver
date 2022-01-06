@@ -1,7 +1,6 @@
 from __future__ import annotations
 from dataclasses import dataclass, field
 import tkinter
-from tkinter import font
 from typing import Tuple, Dict
 
 from sudoku_solver.ui.coordinates import get_candidate_rectangle_coords, board_position_to_coords
@@ -36,7 +35,6 @@ class CandidateRectangle:
 
     def paint_bg(self, color: COLOR):
         self.remove_bg()
-        coords = self.ui_coords
         self.id_bg_color = self.canvas.create_rectangle(*self.ui_coords, fill=color.value, width=0)
 
     def paint_preview_overlay(self, color: COLOR) -> int:

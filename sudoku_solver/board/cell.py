@@ -28,29 +28,30 @@ class Cell(SudokuObservable):
         return f'r{self.y}c{self.x}({values})'
 
     @property
-    def value(self):
+    def value(self) -> Optional[int]:
         return self.candidates[0] if self.is_solved() else None
 
     @property
-    def count_of_candidates(self):
+    def count_candidates(self) -> int:
         return len(self.candidates)
 
-    def is_solved(self):
+    def is_solved(self) -> bool:
         assert self.candidates
         return len(self.candidates) == 1
 
-    def has_candidate(self, candidate: int):
+    def has_candidate(self, candidate: int) -> bool:
         return candidate in self.candidates
 
-    def has_exactly_candidates(self, candidates: Sequence[int]):
+    def has_exactly_candidates(self, candidates: Sequence[int]) -> bool:
         return set(candidates) == set(self.candidates)
 
-    def set_solved_value_to(self, value: int):
+    def set_solved_value_to(self, value: int) -> None:
         """remove all candidates but candidate from list of possible candidates;
         must be unsolved before"""
         assert not self.is_solved()
-        assert value in self.candidates
-        self.flag_invalid_all_but([value])
+        assert self.has_candidate(value)
+        invalidate = [c for c in self.candidates if c != value]
+        self.flag_candidates_invalid(invalidate)
         self.notify_finishing_value(y=self.y, x=self.x, value=value)
 
     def flag_candidates_invalid(self, candidates: Iterable[int]):
@@ -61,12 +62,6 @@ class Cell(SudokuObservable):
 
         if self.is_solved():
             self.notify_finishing_value(y=self.y, x=self.x, value=self.value)
-
-    def flag_invalid_all_but(self, values: List[int]):
-        for value in values:
-            assert self.has_candidate(value)
-        invalidate = [c for c in self.candidates if c not in values]
-        self.flag_candidates_invalid(invalidate)
 
     def get_linked_cells(self, candidate: int, link_type: LinkType, n_candidates: int = None) -> Set[Cell]:
         """optional filter on only linked cells with exactly n total candidates"""
@@ -103,9 +98,9 @@ class Cell(SudokuObservable):
     def seen_by_any_of_candidates(self, candidates: Sequence[int], except_cells: Sequence[Cell] = tuple()) -> Set[Cell]:
         """return all other cells seeing this cell which have any (i.e. one or more) of the supplied candidates;
         consider all houses (row, column,block)"""
-        seen_by_raw = (self.column.get_cells_having_any_of_candidates(candidates=candidates, except_cells=except_cells) +
-                       self.row.get_cells_having_any_of_candidates(candidates=candidates, except_cells=except_cells) +
-                       self.block.get_cells_having_any_of_candidates(candidates=candidates, except_cells=except_cells))
+        seen_by_raw = (self.column.get_cells_having_any_of_candidates(candidates, except_cells=except_cells) +
+                       self.row.get_cells_having_any_of_candidates(candidates, except_cells=except_cells) +
+                       self.block.get_cells_having_any_of_candidates(candidates, except_cells=except_cells))
         seen_by = [c for c in seen_by_raw if c is not self]
         return set(seen_by)
 

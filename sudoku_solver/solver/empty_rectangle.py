@@ -1,8 +1,10 @@
 from sudoku_solver.board.board import Board
 from sudoku_solver.board.houses import HouseType
-from sudoku_solver.board.preview import CommonPreview, IndicatorLevel
+from sudoku_solver.shared.preview import CommonPreview, IndicatorLevel
+from sudoku_solver.solver.decorators import evaluate_algorithm
 
 
+@evaluate_algorithm
 def find_empty_rectangle(board: Board):
     """
     if one candidate is restricted to one row and one column within a block, the remaining cells within form an ER.
@@ -40,7 +42,7 @@ def find_empty_rectangle(board: Board):
             cells_on_col = vertical_line.get_cells_having_candidate(candidate=candidate,
                                                                     except_cells=cells)
 
-            # we need a cell on the row/col that build a conjugate pair with another cell on it's col/row
+            # we need a cell on the row/col that build a conjugate pair with another cell on its col/row
             for cell_on_row in cells_on_row:
                 cells_same_col = cell_on_row.column.get_cells_having_candidate(candidate=candidate,
                                                                                except_cells=[cell_on_row])

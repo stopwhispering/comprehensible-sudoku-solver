@@ -2,7 +2,8 @@ from typing import List, Tuple
 
 from sudoku_solver.board.board import Board
 from sudoku_solver.board.cell import Cell
-from sudoku_solver.board.preview import Preview, IndicatorLevel
+from sudoku_solver.shared.preview import Preview, IndicatorLevel
+from sudoku_solver.solver.decorators import evaluate_algorithm
 
 
 class NFish(Preview):
@@ -48,7 +49,7 @@ def _invalidate_with_n_fish_in_rows(board: Board, value: int, n: int) -> NFish:
         maybe_base_rows = [row for row in rows if 2 <= len(row.get_cells_having_candidate(value)) <= n
                            and row is not leading_row]
         for maybe_base_row in maybe_base_rows:
-            # compare columns (candidate outside of the three cover columns)
+            # compare columns (candidate outside the three cover columns)
             cells_with_candidate = maybe_base_row.get_cells_having_candidate(value)
             if not [c for c in cells_with_candidate if c.column not in cover_columns]:
                 base_rows.append(maybe_base_row)
@@ -103,11 +104,18 @@ def _invalidate_with_n_fish_in_columns(board: Board, value: int, n: int) -> NFis
                     return n_fish
 
 
+@evaluate_algorithm
 def find_n_fish(board: Board, n: int):
     """
     If n (e.g. 3) rows exist in which the candidate under consideration occurs only in exactly the same n different
     columns (either in all those columns or in two of them), then we have found a fish (3 -> swordfish). We may then
     invalidate the candidate in all other cells of those columns. (cf. x-wing)
+
+    n = 3 --> swordfish
+    n = 4 --> jellyfish
+    n = 5 --> squirmbag
+    n = 6 --> whale
+    n = 7 --> leviathan
     """
     for value in range(1, 10):
         n_fish = _invalidate_with_n_fish_in_rows(board=board, value=value, n=n)

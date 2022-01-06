@@ -1,11 +1,14 @@
 from typing import Tuple, Dict, List, Optional, Callable, Sequence
 import tkinter
+from tkinter import filedialog
 
-from sudoku_solver.board.preview import Preview, IndicatorLevel, PreviewArrow
+from sudoku_solver.shared.constants import SUDOKU_DIR
+from sudoku_solver.board.open_sudoku import read_sudoku_file
+from sudoku_solver.shared.preview import Preview, IndicatorLevel, PreviewArrow
+from sudoku_solver.shared.puzzle import SudokuPuzzle
 from sudoku_solver.ui.coordinates import get_candidate_center_coords
 from sudoku_solver.ui.rectangles import CandidateRectangle, ValueRectangle
-from sudoku_solver.ui.ui_constants import (MARGIN, CELL_LENGTH, WIDTH, HEIGHT, BUTTONS_WIDTH,
-                                           PADDING_BETWEEN_BUTTONS, COLOR)
+from sudoku_solver.ui.ui_constants import (MARGIN, CELL_LENGTH, WIDTH, HEIGHT, PADDING_BETWEEN_BUTTONS, COLOR)
 
 
 class SudokuUI(tkinter.Frame):
@@ -30,31 +33,70 @@ class SudokuUI(tkinter.Frame):
         self.previous_button_handler: Optional[Callable] = None
         self.cancel_button: Optional[tkinter.Button] = None
 
+        self.algo_buttons_frame = tkinter.Frame(self)
+        self.algo_buttons_frame.pack(side=tkinter.TOP, ipady=MARGIN)
+
+        self.default_buttons_frame = tkinter.Frame(self)
+        self.default_buttons_frame.pack(side=tkinter.BOTTOM, ipady=MARGIN)
+
         self.add_default_buttons()
 
-    def add_algorithm(self, text: str, handler: callable):
+    def set_algorithms(self, algorithms: List[Tuple[str, Callable]]) -> None:
+        """define algorithm function with texts; buttons are created for each"""
+        frame = None
+        for i, algorithm in enumerate(algorithms):
+            if not i % 13:
+                frame = tkinter.Frame(self.algo_buttons_frame)
+                frame.pack(side=tkinter.LEFT)  # , ipadx=20, ipady=10)
+
+            self._add_algorithm(frame=frame, text=algorithm[0], handler=algorithm[1])
+
+    def _add_algorithm(self, frame, text: str, handler: Callable):
         """add a button for supplied algorithm function"""
 
         def decorated_handler(*args, **kwargs):
-            # remember last pressed button
+            """remember last pressed button"""
             self.previous_button = btn
             handler(*args, **kwargs)
 
-        btn = tkinter.Button(self, text=text, command=decorated_handler)
-        btn.pack(fill=tkinter.BOTH, side=tkinter.TOP, pady=PADDING_BETWEEN_BUTTONS)
+        btn = tkinter.Button(frame, text=text, command=decorated_handler)
+        btn.pack(fill=tkinter.BOTH, side=tkinter.TOP, pady=PADDING_BETWEEN_BUTTONS, padx=PADDING_BETWEEN_BUTTONS)
         self.buttons.append(btn)
 
     def add_default_buttons(self):
-        self.cancel_button = tkinter.Button(self, text='Cancel', state='disabled', command=None)
-        self.cancel_button.pack(fill=tkinter.BOTH, side=tkinter.BOTTOM, pady=PADDING_BETWEEN_BUTTONS)
+        self.cancel_button = tkinter.Button(self.default_buttons_frame, text='Cancel', state='disabled', command='')
+        self.cancel_button.pack(fill=tkinter.BOTH,
+                                side=tkinter.LEFT,
+                                padx=PADDING_BETWEEN_BUTTONS,
+                                pady=PADDING_BETWEEN_BUTTONS)
 
-    def prefill_values(self, prefilled_values: Dict[Tuple, int]):
+        open_button = tkinter.Button(self.default_buttons_frame,
+                                     text='Open Sudoku',
+                                     command=self.show_select_file_dialog)
+        open_button.pack(fill=tkinter.BOTH,
+                         side=tkinter.RIGHT,
+                         padx=PADDING_BETWEEN_BUTTONS,
+                         pady=PADDING_BETWEEN_BUTTONS)
+
+    def show_select_file_dialog(self):
+        # todo make func
+        filename = filedialog.askopenfilename(initialdir=SUDOKU_DIR,
+                                              defaultextension='.sudoku',
+                                              filetypes=[('Sudoku Files', '*.sudoku')])
+        if not filename:
+            return
+        sudoku = read_sudoku_file(path=filename)
+        # todo separate modules
+        from sudoku_solver.init import start_sudoku
+        start_sudoku(sudoku=sudoku, running_ui=self)
+
+    # def prefill_values(self, prefilled_values: Dict[Tuple, int]):
+    def prefill_values(self, prefilled_values: SudokuPuzzle):
         """set the original, known candidates"""
-        for position, value in prefilled_values.items():
-            y, x = position
-            value_rectangle = self.value_rectangles[(y, x)]
+        for prefilled_value in prefilled_values.prefilled_values:
+            value_rectangle = self.value_rectangles[(prefilled_value.y, prefilled_value.x)]
             value_rectangle.remove_grid_candidates_for_cell()
-            value_rectangle.write_value_found(value=value, color=COLOR.PREFILLED_VALUE_FONT)
+            value_rectangle.write_value_found(value=prefilled_value.value, color=COLOR.PREFILLED_VALUE_FONT)
 
     def _draw_grid(self):
         """draw the Sudoku grid, i.e. the lines demarcating the candidate rectangles;
@@ -214,18 +256,8 @@ class SudokuUI(tkinter.Frame):
 
         for btn in self.buttons:
             btn.config(state="normal")
-        self.cancel_button.config(state="disabled", command=None)
+        self.cancel_button.config(state="disabled", command='')
         self.previous_button.config(command=self.previous_button_handler,  # string-encoded; seems to work though
                                     bg='SystemButtonFace')  # default grey
 
 
-def init_ui(prefilled_values: Dict[Tuple, int]) -> SudokuUI:
-    tk = tkinter.Tk()
-    sudoku_ui = SudokuUI(tk)
-    sudoku_ui.prefill_values(prefilled_values)
-    return sudoku_ui
-
-
-def run_ui_loop(sudoku_ui: SudokuUI):
-    sudoku_ui.tk.geometry(f'{WIDTH + BUTTONS_WIDTH}x{HEIGHT}')
-    sudoku_ui.tk.mainloop()

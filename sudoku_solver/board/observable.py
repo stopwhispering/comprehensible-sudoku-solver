@@ -2,7 +2,7 @@ from __future__ import annotations
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
-    from sudoku_solver.board.preview import Preview
+    from sudoku_solver.shared.preview import Preview
 
 
 class SudokuObservable:
@@ -22,7 +22,7 @@ class SudokuObservable:
 
     def subscribe_preview(self, observer_preview: callable):
         """subscribe to receive preview objects of type Preview to indicate pattern; they include
-        an execute() fn"""
+         execute() fn"""
         if observer_preview not in self.observers_preview:
             self.observers_preview.append(observer_preview)
 

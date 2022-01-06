@@ -3,9 +3,11 @@ from typing import Set, Tuple
 
 from sudoku_solver.board.board import Board
 from sudoku_solver.board.cell import Cell
-from sudoku_solver.board.preview import Preview
+from sudoku_solver.shared.preview import Preview
+from sudoku_solver.solver.decorators import evaluate_algorithm
 
 
+@evaluate_algorithm
 def find_skyscraper(board: Board):
     skyscraper = find_skyscraper_rows_type(board=board)
     if not skyscraper:
