@@ -51,8 +51,8 @@ class Board(SudokuObservable):
         """subscribe an observer (GUI) to all cells. They will emit changes to candidates
         and invalidated candidates"""
         for cell in self.get_cells():
-            cell.observe_finishing_value(observer=observer_finishing_value)
-            cell.observe_invalidating_candidate(observer=observer_invalidating_candidate)
+            cell.subscribe_to_finished_values(observer=observer_finishing_value)
+            cell.subscribe_to_invalidated_candidates(observer=observer_invalidating_candidate)
 
     def as_df(self, mode='candidates') -> pd.DataFrame:
         series = {}

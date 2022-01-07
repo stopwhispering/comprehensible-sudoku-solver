@@ -1,11 +1,11 @@
 from dataclasses import dataclass
-from typing import List, Set, Tuple
+from typing import List, Set, Sequence
 
 from sudoku_solver.board.board import Board
 from sudoku_solver.board.cell import Cell
 from sudoku_solver.board.board_constants import LinkType
-from sudoku_solver.shared.preview import Preview, IndicatorLevel
-# from sudoku_solver.solver.decorators import evaluate_algorithm
+from sudoku_solver.shared.preview import Preview, IndicatorLevel, HighlightedPosition
+from sudoku_solver.shared.puzzle import ValuePosition
 from sudoku_solver.solver.decorators import evaluate_algorithm
 
 
@@ -15,15 +15,16 @@ class XChain(Preview):
     candidate: int
     other_cells_seeing_start_and_end: Set[Cell]
 
-    def get_preview_line_nodes(self) -> Tuple[Tuple[int, int, int]]:
+    def get_preview_line_nodes(self) -> Sequence[ValuePosition]:
         """create a line from chain start to chain end"""
         # just concatenate the x/y/c combination from start to end
-        nodes = tuple((c.x, c.y, self.candidate) for c in self.chain)
+        nodes = tuple(ValuePosition(x=c.x, y=c.y, value=self.candidate) for c in self.chain)
         return nodes
 
-    def get_invalidated_candidates(self) -> Tuple[Tuple[int, int, int]]:
+    def get_invalidated_candidates(self) -> Sequence[ValuePosition]:
         """return the board positions where the candidate is invalidated"""
-        positions = tuple((c.x, c.y, self.candidate) for c in self.other_cells_seeing_start_and_end)
+        positions = tuple(ValuePosition(x=c.x, y=c.y, value=self.candidate) for c in
+                          self.other_cells_seeing_start_and_end)
         return positions
 
     def execute(self):
@@ -129,31 +130,45 @@ class XYChain(Preview):
         else:
             return False
 
-    def get_indicator_candidates(self) -> Tuple[Tuple[int, int, int, IndicatorLevel]]:
+    def get_indicator_candidates(self) -> Sequence[HighlightedPosition]:
         positions = []
-        first_start = (self.chain[0].cell.x, self.chain[0].cell.y, self.chain[0].starting_candidate,
-                       IndicatorLevel.FIRST,)
-        first_next = (self.chain[0].cell.x, self.chain[0].cell.y, self.chain[0].next_candidate,
-                      IndicatorLevel.DEFAULT,)
+        first_start = HighlightedPosition(x=self.chain[0].cell.x,
+                                          y=self.chain[0].cell.y,
+                                          value=self.chain[0].starting_candidate,
+                                          indicator_level=IndicatorLevel.FIRST,)
+        first_next = HighlightedPosition(x=self.chain[0].cell.x,
+                                         y=self.chain[0].cell.y,
+                                         value=self.chain[0].next_candidate,
+                                         indicator_level=IndicatorLevel.DEFAULT,)
         positions.append(first_start)
         positions.append(first_next)
 
         for member in self.chain:
-            positions.append((member.cell.x, member.cell.y, member.starting_candidate, IndicatorLevel.DEFAULT))
-            positions.append((member.cell.x, member.cell.y, member.next_candidate, IndicatorLevel.ALTERNATIVE))
+            positions.append(HighlightedPosition(x=member.cell.x,
+                                                 y=member.cell.y,
+                                                 value=member.starting_candidate,
+                                                 indicator_level=IndicatorLevel.DEFAULT))
+            positions.append(HighlightedPosition(x=member.cell.x,
+                                                 y=member.cell.y,
+                                                 value=member.next_candidate,
+                                                 indicator_level=IndicatorLevel.ALTERNATIVE))
 
-        last_start = (self.chain[-1].cell.x, self.chain[-1].cell.y, self.chain[-1].starting_candidate,
-                      IndicatorLevel.DEFAULT)
-        last_next = (self.chain[-1].cell.x, self.chain[-1].cell.y, self.chain[-1].next_candidate,
-                     IndicatorLevel.LAST)
+        last_start = HighlightedPosition(x=self.chain[-1].cell.x,
+                                         y=self.chain[-1].cell.y,
+                                         value=self.chain[-1].starting_candidate,
+                                         indicator_level=IndicatorLevel.DEFAULT)
+        last_next = HighlightedPosition(x=self.chain[-1].cell.x,
+                                        y=self.chain[-1].cell.y,
+                                        value=self.chain[-1].next_candidate,
+                                        indicator_level=IndicatorLevel.LAST)
         positions.append(last_start)
         positions.append(last_next)
 
         return tuple(positions)
 
-    def get_invalidated_candidates(self) -> Tuple[Tuple[int, int, int]]:
+    def get_invalidated_candidates(self) -> Sequence[ValuePosition]:
         """return the board positions where the candidate is invalidated"""
-        positions = tuple((c.x, c.y, self.starting_candidate) for c in self.other_cells)
+        positions = tuple(ValuePosition(x=c.x, y=c.y, value=self.starting_candidate) for c in self.other_cells)
         return positions
 
     def execute(self):

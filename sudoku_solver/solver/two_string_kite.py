@@ -1,9 +1,10 @@
 import itertools
-from typing import List, Tuple
+from typing import List, Sequence
 
 from sudoku_solver.board.board import Board
 from sudoku_solver.board.cell import Cell
-from sudoku_solver.shared.preview import Preview, IndicatorLevel
+from sudoku_solver.shared.preview import Preview, IndicatorLevel, HighlightedPosition
+from sudoku_solver.shared.puzzle import ValuePosition
 from sudoku_solver.solver.decorators import evaluate_algorithm
 
 
@@ -17,11 +18,17 @@ class TwoStringKite(Preview):
         self.shared_block_cells = shared_block_cells
         self.kite_cells = kite_cells
 
-    def get_indicator_candidates(self) -> Tuple[Tuple[int, int, int, IndicatorLevel]]:
+    def get_indicator_candidates(self) -> Sequence[HighlightedPosition]:
         """return the board positions of kite and util-block cells in different colors"""
-        pos_shared = [(cell.x, cell.y, self.candidate, IndicatorLevel.DEFAULT) for cell in self.shared_block_cells]
-        pos_kite = [(cell.x, cell.y, self.candidate, IndicatorLevel.ALTERNATIVE) for cell in self.kite_cells]
-        return tuple(pos_shared + pos_kite)
+        pos_shared = [HighlightedPosition(x=cell.x,
+                                          y=cell.y,
+                                          value=self.candidate,
+                                          indicator_level=IndicatorLevel.DEFAULT) for cell in self.shared_block_cells]
+        pos_kite = [HighlightedPosition(x=cell.x,
+                                        y=cell.y,
+                                        value=self.candidate,
+                                        indicator_level=IndicatorLevel.ALTERNATIVE) for cell in self.kite_cells]
+        return pos_shared + pos_kite
 
     def _get_invalidated_cells(self) -> List[Cell]:
         seen_by_a = self.kite_cells[0].seen_by(self.candidate)
@@ -30,12 +37,12 @@ class TwoStringKite(Preview):
         seen_by_both = [c for c in seen_by_both_raw if c not in self.kite_cells and c not in self.shared_block_cells]
         return seen_by_both
 
-    def get_invalidated_candidates(self) -> Tuple[Tuple[int, int, int]]:
+    def get_invalidated_candidates(self) -> Sequence[ValuePosition]:
         """return the board positions where the candidate is invalidated"""
         # invalidate candidate in cells that see both kite cells
         invalidated_cells = self._get_invalidated_cells()
-        pos = [(c.x, c.y, self.candidate) for c in invalidated_cells]
-        return tuple(pos)
+        pos = [ValuePosition(x=c.x, y=c.y, value=self.candidate) for c in invalidated_cells]
+        return pos
 
     def execute(self):
         invalidated_cells = self._get_invalidated_cells()

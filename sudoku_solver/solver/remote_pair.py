@@ -4,7 +4,8 @@ from typing import Sequence, Set, List, Tuple
 
 from sudoku_solver.board.board import Board
 from sudoku_solver.board.cell import Cell
-from sudoku_solver.shared.preview import Preview, IndicatorLevel
+from sudoku_solver.shared.preview import Preview, IndicatorLevel, HighlightedPosition
+from sudoku_solver.shared.puzzle import ValuePosition
 from sudoku_solver.solver.decorators import evaluate_algorithm
 
 
@@ -45,26 +46,32 @@ class RemotePair(Preview):
         for cell in self.other_cells_to_invalidate:
             cell.flag_candidates_invalid(self.candidates)
 
-    def get_invalidated_candidates(self) -> Tuple[Tuple[int, int, int]]:  # x, y, candidate
+    def get_invalidated_candidates(self) -> Sequence[ValuePosition]:
         """get the candidate positions to be invalidated"""
-        invalidated: List[Tuple[int, int, int]] = []
+        invalidated = []
         for cell in self.other_cells_to_invalidate:
-            invalidated.extend([(cell.x, cell.y, candidate) for candidate in cell.candidates
+            invalidated.extend([ValuePosition(x=cell.x, y=cell.y, value=candidate) for candidate in cell.candidates
                                 if candidate in self.candidates])
-        return tuple(invalidated)
+        return invalidated
 
-    def get_indicator_candidates(self) -> Tuple[Tuple[int, int, int, IndicatorLevel]]:
+    def get_indicator_candidates(self) -> Sequence[HighlightedPosition]:
         """get candidate positions to be highlighted"""
         positions = []
         for member in [member for member in self.members if member.type == 'odd']:
-            positions.extend([(member.cell.x, member.cell.y, candidate, IndicatorLevel.DEFAULT,) for candidate in
-                              member.cell.candidates])
+            positions.extend([HighlightedPosition(x=member.cell.x,
+                                                  y=member.cell.y,
+                                                  value=candidate,
+                                                  indicator_level=IndicatorLevel.DEFAULT,
+                                                  ) for candidate in member.cell.candidates])
 
         for member in [member for member in self.members if member.type == 'even']:
-            positions.extend([(member.cell.x, member.cell.y, candidate, IndicatorLevel.ALTERNATIVE,) for candidate in
-                              member.cell.candidates])
+            positions.extend([HighlightedPosition(x=member.cell.x,
+                                                  y=member.cell.y,
+                                                  value=candidate,
+                                                  indicator_level=IndicatorLevel.ALTERNATIVE,
+                                                  ) for candidate in member.cell.candidates])
 
-        return tuple(positions)
+        return positions
 
 
 def _is_remote_pair(cells: Sequence[Cell]):
@@ -78,7 +85,7 @@ def _is_remote_pair(cells: Sequence[Cell]):
 
 def _find_remote_pairs_for_candidate_combination(candidates: Sequence[int],
                                                  combi_cells: List[Cell]) -> List[Tuple[RemotePair, int]]:
-    # build longest chain by testing all cell orders (and all lengths 4+)
+    # build the longest possible chain by testing all cell orders (and all lengths 4+)
     assert len(combi_cells) >= 4
     remote_pairs: List[Tuple[RemotePair, int]] = []
 

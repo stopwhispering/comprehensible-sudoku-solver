@@ -1,8 +1,9 @@
-from typing import List, Tuple
+from typing import List, Sequence
 
 from sudoku_solver.board.board import Board
 from sudoku_solver.board.cell import Cell
-from sudoku_solver.shared.preview import Preview, IndicatorLevel
+from sudoku_solver.shared.preview import Preview, IndicatorLevel, HighlightedPosition
+from sudoku_solver.shared.puzzle import ValuePosition
 from sudoku_solver.solver.decorators import evaluate_algorithm
 
 
@@ -14,14 +15,16 @@ class NFish(Preview):
         self.cells_in_base_rows_or_columns = cells_in_base_rows_or_columns
         self.other_cells_in_cover_columns_or_rows = other_cells_in_cover_columns_or_rows
 
-    def get_indicator_candidates(self) -> Tuple[Tuple[int, int, int, IndicatorLevel]]:
+    def get_indicator_candidates(self) -> Sequence[HighlightedPosition]:
         """return the board positions of base row candidates"""
-        pos = tuple((c.x, c.y, self.candidate, IndicatorLevel.DEFAULT) for c in self.cells_in_base_rows_or_columns)
+        pos = tuple(HighlightedPosition(x=c.x, y=c.y, value=self.candidate, indicator_level=IndicatorLevel.DEFAULT)
+                    for c in self.cells_in_base_rows_or_columns)
         return pos
 
-    def get_invalidated_candidates(self) -> Tuple[Tuple[int, int, int]]:
+    def get_invalidated_candidates(self) -> Sequence[ValuePosition]:
         """return the board positions where the candidate is invalidated"""
-        positions = tuple((c.x, c.y, self.candidate) for c in self.other_cells_in_cover_columns_or_rows)
+        positions = tuple(ValuePosition(x=c.x, y=c.y, value=self.candidate) for c in
+                          self.other_cells_in_cover_columns_or_rows)
         return positions
 
     def execute(self):

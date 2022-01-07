@@ -1,10 +1,11 @@
 import itertools
-from typing import Optional, Tuple, Sequence
+from typing import Optional, Sequence
 
 from sudoku_solver.board.board import Board
 from sudoku_solver.board.cell import Cell
 from sudoku_solver.board.houses import House
-from sudoku_solver.shared.preview import Preview, IndicatorLevel
+from sudoku_solver.shared.preview import Preview, IndicatorLevel, HighlightedPosition
+from sudoku_solver.shared.puzzle import ValuePosition
 from sudoku_solver.solver.decorators import evaluate_algorithm
 
 
@@ -15,17 +16,16 @@ class HiddenSubset(Preview):
         self.candidates = candidates
         self.hidden_cells = hidden_cells
 
-    def get_indicator_candidates(self) -> Tuple[Tuple[int, int, int, IndicatorLevel]]:
+    def get_indicator_candidates(self) -> Sequence[HighlightedPosition]:
         """return the board positions of base row candidates"""
-        pos = [(cell.x, cell.y, c, IndicatorLevel.DEFAULT) for cell in self.hidden_cells for c in cell.candidates
-               if c in self.candidates]
-        return tuple(pos)
+        pos = [HighlightedPosition(x=cell.x, y=cell.y, value=c, indicator_level=IndicatorLevel.DEFAULT) for cell in
+               self.hidden_cells for c in cell.candidates if c in self.candidates]
+        return pos
 
-    def get_invalidated_candidates(self) -> Tuple[Tuple[int, int, int]]:
+    def get_invalidated_candidates(self) -> Sequence[ValuePosition]:
         """return the board positions where the candidate is invalidated"""
-        pos = [(cell.x, cell.y, c) for cell in self.hidden_cells for c in cell.candidates
-               if c not in self.candidates]
-        return tuple(pos)
+        return tuple((ValuePosition(x=cell.x, y=cell.y, value=c) for cell in self.hidden_cells for c in cell.candidates
+                      if c not in self.candidates))
 
     def execute(self):
         invalidate = [(cell, candidate) for cell in self.hidden_cells for candidate in cell.candidates

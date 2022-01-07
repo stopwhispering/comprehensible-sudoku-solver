@@ -3,18 +3,17 @@ import tkinter
 from tkinter import filedialog
 
 from sudoku_solver.shared.constants import SUDOKU_DIR
-from sudoku_solver.board.open_sudoku import read_sudoku_file
-from sudoku_solver.shared.preview import Preview, IndicatorLevel, PreviewArrow
-from sudoku_solver.shared.puzzle import SudokuPuzzle
+from sudoku_solver.shared.preview import Preview, IndicatorLevel, PreviewArrow, HighlightedPosition
+from sudoku_solver.shared.puzzle import SudokuPuzzle, ValuePosition, read_sudoku_file
 from sudoku_solver.ui.coordinates import get_candidate_center_coords
 from sudoku_solver.ui.rectangles import CandidateRectangle, ValueRectangle
 from sudoku_solver.ui.ui_constants import (MARGIN, CELL_LENGTH, WIDTH, HEIGHT, PADDING_BETWEEN_BUTTONS, COLOR)
 
 
 class SudokuUI(tkinter.Frame):
-    def __init__(self, tk):
+    def __init__(self, tk: tkinter.Tk):
         tkinter.Frame.__init__(self, master=tk)
-        self.tk = tk
+        self.tk: tkinter.Tk = tk
         self.row, self.col = -1, -1
         self.tk.title("Sudoku - Comprehensible Algorithms Solver")
         self.pack(fill='both')
@@ -23,7 +22,8 @@ class SudokuUI(tkinter.Frame):
         self.canvas.pack(fill=tkinter.BOTH, side=tkinter.LEFT)
 
         self.value_rectangles: Dict[Tuple[int, int], ValueRectangle] = {}
-        self.candidate_rectangles: Dict[Tuple[int, int, int], CandidateRectangle] = {}
+        # self.candidate_rectangles: Dict[Tuple[int, int, int], CandidateRectangle] = {}
+        self.candidate_rectangles: Dict[ValuePosition, CandidateRectangle] = {}
         self._draw_grid()
         self._draw_candidates()
 
@@ -79,7 +79,6 @@ class SudokuUI(tkinter.Frame):
                          pady=PADDING_BETWEEN_BUTTONS)
 
     def show_select_file_dialog(self):
-        # todo make func
         filename = filedialog.askopenfilename(initialdir=SUDOKU_DIR,
                                               defaultextension='.sudoku',
                                               filetypes=[('Sudoku Files', '*.sudoku')])
@@ -90,7 +89,6 @@ class SudokuUI(tkinter.Frame):
         from sudoku_solver.init import start_sudoku
         start_sudoku(sudoku=sudoku, running_ui=self)
 
-    # def prefill_values(self, prefilled_values: Dict[Tuple, int]):
     def prefill_values(self, prefilled_values: SudokuPuzzle):
         """set the original, known candidates"""
         for prefilled_value in prefilled_values.prefilled_values:
@@ -131,35 +129,34 @@ class SudokuUI(tkinter.Frame):
                     candidate_rectangle.paint_bg(color=COLOR.CANDIDATE_BG)
                     candidate_rectangle.write_candidate(color=COLOR.CANDIDATE_FONT)
 
-                    self.candidate_rectangles[(y, x, candidate,)] = candidate_rectangle
+                    self.candidate_rectangles[ValuePosition(x=x,
+                                                            y=y,
+                                                            value=candidate)] = candidate_rectangle
+
                     value_rectangle.candidate_rectangles[candidate] = candidate_rectangle
 
-    def _draw_found_value(self, y: int, x: int, value: int):
-        value_rectangle = self.value_rectangles[(y, x)]
+    def _draw_found_value(self, solved_value_position: ValuePosition):
+        value_rectangle = self.value_rectangles[(solved_value_position.y, solved_value_position.x)]
         value_rectangle.remove_grid_candidates_for_cell()
-        value_rectangle.write_value_found(value=value, color=COLOR.FOUND_VALUE_FONT)
+        value_rectangle.write_value_found(value=solved_value_position.value, color=COLOR.FOUND_VALUE_FONT)
 
-    def observe_finishing_value(self, y, x, value):
+    def observe_finishing_value(self, solved_value_position: ValuePosition):
         """observer function for finished candidates from board;
         subscribe to board observer"""
-        self._draw_found_value(y=int(y), x=int(x), value=int(value))
+        self._draw_found_value(solved_value_position)
 
-    def observe_invalidating_candidate(self, y: int, x: int, invalidated_value: int):
+    def observe_invalidating_candidate(self, invalidated_candidate_position: ValuePosition):
         """observer function for invalidated candidate candidates from board;
         subscribe to board observer"""
-        candidate_rectangle = self.candidate_rectangles[(y, x, invalidated_value)]
+        candidate_rectangle = self.candidate_rectangles[invalidated_candidate_position]
         candidate_rectangle.remove_text()
         candidate_rectangle.paint_bg(COLOR.INVALID_CANDIDATE_BG)
 
-    def _draw_preview_line(self, line_nodes: Tuple[Tuple[int, int, int]]):
+    def _draw_preview_line(self, line_nodes: Sequence[ValuePosition]):
         for i in range(len(line_nodes) - 1):
-            node_a = self.candidate_rectangles[(line_nodes[i][0],
-                                                line_nodes[i][1],
-                                                line_nodes[i][2],)]
+            node_a = self.candidate_rectangles[line_nodes[i]]
+            node_b = self.candidate_rectangles[line_nodes[i+1]]
 
-            node_b = self.candidate_rectangles[(line_nodes[i + 1][0],
-                                                line_nodes[i + 1][1],
-                                                line_nodes[i + 1][2],)]
             x0 = min(node_a.ui_coords[0], node_b.ui_coords[0])
             y0 = min(node_a.ui_coords[1], node_b.ui_coords[1])
             x1 = max(node_a.ui_coords[2], node_b.ui_coords[2])
@@ -172,20 +169,20 @@ class SudokuUI(tkinter.Frame):
                                                            stipple="gray12")  # "gray50"
             self.previous_preview_ids.append(green_rectangle)
 
-    def _draw_preview_invalidations(self, invalidated_positions: Tuple[Tuple[int, int, int]]):
+    def _draw_preview_invalidations(self, invalidated_positions: Sequence[ValuePosition]):
         for position in invalidated_positions:
-            candidate_rectangle = self.candidate_rectangles[(position[1], position[0], position[2])]
+            candidate_rectangle = self.candidate_rectangles[ValuePosition(position.x, position.y, position.value)]
             preview_overlay = candidate_rectangle.paint_preview_overlay(color=COLOR.RED)
             self.previous_preview_ids.append(preview_overlay)
 
     @staticmethod
     def arrow_to_coords(arrow: PreviewArrow) -> Tuple[float, float, float, float]:
-        x_from, y_from = get_candidate_center_coords(y=arrow.pos_from.row,
-                                                     x=arrow.pos_from.col,
-                                                     candidate=arrow.pos_from.candidate)
-        x_to, y_to = get_candidate_center_coords(y=arrow.pos_to.row,
-                                                 x=arrow.pos_to.col,
-                                                 candidate=arrow.pos_to.candidate)
+        x_from, y_from = get_candidate_center_coords(y=arrow.pos_from.y,
+                                                     x=arrow.pos_from.x,
+                                                     candidate=arrow.pos_from.value)
+        x_to, y_to = get_candidate_center_coords(y=arrow.pos_to.y,
+                                                 x=arrow.pos_to.x,
+                                                 candidate=arrow.pos_to.value)
         return x_from, y_from, x_to, y_to
 
     def _draw_preview_arrows(self, indicator_arrows: Sequence[PreviewArrow]):
@@ -208,14 +205,14 @@ class SudokuUI(tkinter.Frame):
         else:
             raise ValueError('Unknown IndicatorLevel. Map to Color.')
 
-    def _draw_preview_indications(self, indicated_positions: Tuple[Tuple[int, int, int, Optional[IndicatorLevel]]]):
+    def _draw_preview_indications(self, indicated_positions: Sequence[HighlightedPosition]):
         for position in indicated_positions:
-            if len(position) < 4:
+            if not position.indicator_level:
                 color = COLOR.GREEN
             else:
-                color = self._indicator_level_to_color(indicator_level=position[3])
+                color = self._indicator_level_to_color(indicator_level=position.indicator_level)
 
-            candidate_rectangle = self.candidate_rectangles[(position[1], position[0], position[2])]
+            candidate_rectangle = self.candidate_rectangles[position]
             preview_overlay = candidate_rectangle.paint_preview_overlay(color=color)
             self.previous_preview_ids.append(preview_overlay)
 
@@ -259,5 +256,3 @@ class SudokuUI(tkinter.Frame):
         self.cancel_button.config(state="disabled", command='')
         self.previous_button.config(command=self.previous_button_handler,  # string-encoded; seems to work though
                                     bg='SystemButtonFace')  # default grey
-
-

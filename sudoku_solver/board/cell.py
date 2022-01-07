@@ -3,6 +3,8 @@ from typing import TYPE_CHECKING, Sequence
 
 from typing import Optional, List, Iterable, Set
 
+from sudoku_solver.shared.puzzle import ValuePosition
+
 if TYPE_CHECKING:
     from sudoku_solver.board.houses import Row, Column, Block
 from sudoku_solver.board.board_constants import LinkType
@@ -52,16 +54,19 @@ class Cell(SudokuObservable):
         assert self.has_candidate(value)
         invalidate = [c for c in self.candidates if c != value]
         self.flag_candidates_invalid(invalidate)
-        self.notify_finishing_value(y=self.y, x=self.x, value=value)
+        solved_value_position = ValuePosition(x=self.x, y=self.y, value=value)
+        self.notify_solved_value(solved_value_position=solved_value_position)
 
     def flag_candidates_invalid(self, candidates: Iterable[int]):
         for candidate in candidates:
             if candidate in self.candidates:
                 self.candidates.remove(candidate)
-                self.notify_invalidating_candidate(y=self.y, x=self.x, invalidated_value=candidate)
+                invalidated_candidate_position = ValuePosition(x=self.x, y=self.y, value=candidate)
+                self.notify_invalidated_candidate(invalidated_candidate_position=invalidated_candidate_position)
 
         if self.is_solved():
-            self.notify_finishing_value(y=self.y, x=self.x, value=self.value)
+            solved_value_position = ValuePosition(x=self.x, y=self.y, value=self.value)
+            self.notify_solved_value(solved_value_position=solved_value_position)
 
     def get_linked_cells(self, candidate: int, link_type: LinkType, n_candidates: int = None) -> Set[Cell]:
         """optional filter on only linked cells with exactly n total candidates"""

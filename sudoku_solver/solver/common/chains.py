@@ -1,7 +1,8 @@
 from typing import List, Union, Tuple
 
 from sudoku_solver.board.cell import Cell
-from sudoku_solver.shared.preview import PreviewArrow, PreviewPosition, IndicatorLevel
+from sudoku_solver.shared.preview import PreviewArrow, IndicatorLevel, HighlightedPosition
+from sudoku_solver.shared.puzzle import ValuePosition
 from sudoku_solver.util.exceptions import ChainError
 from sudoku_solver.solver.common.links import Link, StrongLink, WeakLink
 
@@ -60,25 +61,25 @@ class Chain:
         arrows = []
         # generate an arrow for each link
         for link in self.links:
-            pos_from = PreviewPosition(row=link.cells[0].y, col=link.cells[0].x, candidate=link.candidate)
-            pos_to = PreviewPosition(row=link.cells[1].y, col=link.cells[1].x, candidate=link.candidate)
+            pos_from = ValuePosition(x=link.cells[0].x, y=link.cells[0].y, value=link.candidate)
+            pos_to = ValuePosition(x=link.cells[1].x, y=link.cells[1].y, value=link.candidate)
             indicator_level = IndicatorLevel.DEFAULT if isinstance(link, WeakLink) else IndicatorLevel.ALTERNATIVE
             arrows.append(PreviewArrow(pos_from=pos_from, pos_to=pos_to, indicator_level=indicator_level))
         return arrows
 
-    def get_indicators_for_preview(self) -> Tuple[Tuple[int, int, int, IndicatorLevel], ...]:
+    def get_indicators_for_preview(self) -> Tuple[HighlightedPosition]:
         assert self.links[-1].cells[1] is self.links[0].cells[0]
         indicators = []
         for i, link in enumerate(self.links):
             cell_a, cell_b = link.cells
             if i == 0:
-                indicators.append((cell_a.x, cell_a.y, link.candidate, IndicatorLevel.FIRST))
+                indicators.append(HighlightedPosition(cell_a.x, cell_a.y, link.candidate, IndicatorLevel.FIRST))
             else:
-                indicators.append((cell_a.x, cell_a.y, link.candidate, IndicatorLevel.DEFAULT))
+                indicators.append(HighlightedPosition(cell_a.x, cell_a.y, link.candidate, IndicatorLevel.DEFAULT))
             if i == len(self.links) - 1:
-                indicators.append((cell_b.x, cell_b.y, link.candidate, IndicatorLevel.LAST))
+                indicators.append(HighlightedPosition(cell_b.x, cell_b.y, link.candidate, IndicatorLevel.LAST))
             else:
-                indicators.append((cell_b.x, cell_b.y, link.candidate, IndicatorLevel.DEFAULT))
+                indicators.append(HighlightedPosition(cell_b.x, cell_b.y, link.candidate, IndicatorLevel.DEFAULT))
 
         return tuple(indicators)
 

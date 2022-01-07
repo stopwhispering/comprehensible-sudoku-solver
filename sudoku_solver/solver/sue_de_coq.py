@@ -3,7 +3,7 @@ from typing import Optional
 
 from sudoku_solver.board.board import Board
 from sudoku_solver.board.houses import Block, HouseType, House
-from sudoku_solver.shared.preview import Preview, IndicatorLevel, CommonPreview
+from sudoku_solver.shared.preview import Preview, IndicatorLevel, CommonPreview, HighlightedPosition
 from sudoku_solver.solver.decorators import evaluate_algorithm
 
 
@@ -64,14 +64,19 @@ def _find_sue_de_coq_in_intersection(board: Board,
 
         indicator_candidates = []
         for cell in intersection:
-            indicator_candidates.extend([(cell.x, cell.y, c, IndicatorLevel.DEFAULT) for c in cell.candidates])
+            indicator_candidates.extend([HighlightedPosition(cell.x, cell.y, c, IndicatorLevel.DEFAULT)
+                                         for c in cell.candidates])
         indicator_candidates.extend(
-                [(cell_block.x, cell_block.y, c, IndicatorLevel.ALTERNATIVE) for c in cell_block.candidates])
-        indicator_candidates.extend([(cell_other_house.x, cell_other_house.y, c, IndicatorLevel.ALTERNATIVE) for c in
+                [HighlightedPosition(cell_block.x, cell_block.y, c, IndicatorLevel.ALTERNATIVE)
+                 for c in cell_block.candidates])
+        indicator_candidates.extend([HighlightedPosition(cell_other_house.x,
+                                                         cell_other_house.y,
+                                                         c,
+                                                         IndicatorLevel.ALTERNATIVE) for c in
                                      cell_other_house.candidates])
 
         sue_de_coq = CommonPreview(invalidated_cells=invalidated_cells,
-                                   indicator_candidates=tuple(indicator_candidates))
+                                   indicator_candidates=indicator_candidates)
         return sue_de_coq
 
 

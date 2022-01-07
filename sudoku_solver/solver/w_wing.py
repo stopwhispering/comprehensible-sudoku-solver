@@ -1,7 +1,7 @@
 import itertools
 
 from sudoku_solver.board.board import Board
-from sudoku_solver.shared.preview import IndicatorLevel, CommonPreview
+from sudoku_solver.shared.preview import IndicatorLevel, CommonPreview, HighlightedPosition
 from sudoku_solver.solver.decorators import evaluate_algorithm
 
 
@@ -56,12 +56,20 @@ def find_w_wing(board: Board):
                     invalidated_cells = [(cell, candidate_z) for cell in other_cells]
                     indicator_candidates = []
                     for pincer_cell in pincer_cells:
-                        indicator_candidates.append((pincer_cell.x, pincer_cell.y, candidate_w, IndicatorLevel.DEFAULT))
-                        indicator_candidates.append(
-                                (pincer_cell.x, pincer_cell.y, candidate_z, IndicatorLevel.ALTERNATIVE))
+                        indicator_candidates.append(HighlightedPosition(x=pincer_cell.x,
+                                                                        y=pincer_cell.y,
+                                                                        value=candidate_w,
+                                                                        indicator_level=IndicatorLevel.DEFAULT))
+                        indicator_candidates.append(HighlightedPosition(x=pincer_cell.x,
+                                                                        y=pincer_cell.y,
+                                                                        value=candidate_z,
+                                                                        indicator_level=IndicatorLevel.ALTERNATIVE))
                     for pivot_cell in pivot_cells:
-                        indicator_candidates.append((pivot_cell.x, pivot_cell.y, candidate_w, IndicatorLevel.DEFAULT))
+                        indicator_candidates.append(HighlightedPosition(x=pivot_cell.x,
+                                                                        y=pivot_cell.y,
+                                                                        value=candidate_w,
+                                                                        indicator_level=IndicatorLevel.DEFAULT))
                     w_wing = CommonPreview(invalidated_cells=invalidated_cells,
-                                           indicator_candidates=tuple(indicator_candidates))
+                                           indicator_candidates=indicator_candidates)
                     board.notify_preview(preview=w_wing)
                     return

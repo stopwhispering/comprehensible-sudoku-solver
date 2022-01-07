@@ -1,9 +1,10 @@
 import itertools
-from typing import Set, Tuple
+from typing import Set, Sequence
 
 from sudoku_solver.board.board import Board
 from sudoku_solver.board.cell import Cell
 from sudoku_solver.shared.preview import Preview
+from sudoku_solver.shared.puzzle import ValuePosition
 from sudoku_solver.solver.decorators import evaluate_algorithm
 
 
@@ -21,10 +22,9 @@ class Skyscraper(Preview):
         self.candidate = candidate
         self.cells_seeing_both_roof_cells = cells_seeing_both_roof_cells
 
-    def get_invalidated_candidates(self) -> Tuple[Tuple[int, int, int]]:
+    def get_invalidated_candidates(self) -> Sequence[ValuePosition]:
         """return the board positions where the candidate is invalidated"""
-        positions = tuple((c.x, c.y, self.candidate) for c in self.cells_seeing_both_roof_cells)
-        return positions
+        return tuple(ValuePosition(x=c.x, y=c.y, value=self.candidate) for c in self.cells_seeing_both_roof_cells)
 
     def execute(self):
         for cell in self.cells_seeing_both_roof_cells:

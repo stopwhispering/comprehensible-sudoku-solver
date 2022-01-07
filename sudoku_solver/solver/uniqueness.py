@@ -1,7 +1,7 @@
 import itertools
 
 from sudoku_solver.board.board import Board
-from sudoku_solver.shared.preview import CommonPreview, IndicatorLevel, Preview
+from sudoku_solver.shared.preview import CommonPreview, IndicatorLevel, Preview, HighlightedPosition
 from sudoku_solver.solver.decorators import evaluate_algorithm
 
 
@@ -36,12 +36,14 @@ def _find_unique_rectangles_type_1(board: Board) -> Preview:
 
             # we may now invalidate the two unique rectangle candidates from the cell that has more than candidates
             invalidated_cells = tuple((combination[1], candidate,) for candidate in candidates)
-            default = [(cell.x, cell.y, c, IndicatorLevel.DEFAULT) for cell in combination[0] for c in candidates]
+            default = [HighlightedPosition(cell.x, cell.y, c, IndicatorLevel.DEFAULT)
+                       for cell in combination[0] for c in candidates]
             other_candidates = [c for c in combination[1].candidates if c not in candidates]
-            altern = [(combination[1].x, combination[1].y, c, IndicatorLevel.ALTERNATIVE) for c in other_candidates]
+            altern = [HighlightedPosition(combination[1].x, combination[1].y, c, IndicatorLevel.ALTERNATIVE)
+                      for c in other_candidates]
 
             ur_type_1 = CommonPreview(invalidated_cells=invalidated_cells,
-                                      indicator_candidates=tuple(default + altern))
+                                      indicator_candidates=default + altern)
             return ur_type_1
 
 
@@ -102,9 +104,10 @@ def _find_unique_rectangles_type_2(board: Board) -> Preview:
                     continue
 
                 invalidated_cells = tuple((cell, extra_candidate) for cell in seen_cells)
-                default = [(cell.x, cell.y, c, IndicatorLevel.DEFAULT) for cell in combi_flat for c in
-                           candidates]
-                altern = [(cell.x, cell.y, extra_candidate, IndicatorLevel.ALTERNATIVE) for cell in combination[1]]
+                default = [HighlightedPosition(cell.x, cell.y, c, IndicatorLevel.DEFAULT)
+                           for cell in combi_flat for c in candidates]
+                altern = [HighlightedPosition(cell.x, cell.y, extra_candidate, IndicatorLevel.ALTERNATIVE)
+                          for cell in combination[1]]
                 ur_type_2 = CommonPreview(invalidated_cells=invalidated_cells,
                                           indicator_candidates=tuple(default + altern))
                 return ur_type_2
@@ -167,11 +170,12 @@ def _find_unique_rectangles_type_4(board: Board) -> Preview:
                         invalid_candidate = candidates[0] if cand == candidates[1] else candidates[1]
                         invalidated_cells = tuple((cell, invalid_candidate) for cell in combination[1])
 
-                        default_two = [(cell.x, cell.y, c, IndicatorLevel.DEFAULT) for cell in combination[0] for c in
-                                       candidates]
-                        default_n = [(cell.x, cell.y, cand, IndicatorLevel.DEFAULT) for cell in combination[1]]
+                        default_two = [HighlightedPosition(cell.x, cell.y, c, IndicatorLevel.DEFAULT)
+                                       for cell in combination[0] for c in candidates]
+                        default_n = [HighlightedPosition(cell.x, cell.y, cand, IndicatorLevel.DEFAULT)
+                                     for cell in combination[1]]
                         ur_type_4 = CommonPreview(invalidated_cells=invalidated_cells,
-                                                  indicator_candidates=tuple(default_two + default_n))
+                                                  indicator_candidates=default_two + default_n)
                         return ur_type_4
 
 

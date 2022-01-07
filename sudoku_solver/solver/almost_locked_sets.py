@@ -4,7 +4,7 @@ from typing import List, Tuple, Sequence, Optional
 
 from sudoku_solver.board.board import Board
 from sudoku_solver.board.cell import Cell
-from sudoku_solver.shared.preview import CommonPreview, IndicatorLevel
+from sudoku_solver.shared.preview import CommonPreview, IndicatorLevel, HighlightedPosition
 from sudoku_solver.solver.decorators import evaluate_algorithm
 
 
@@ -76,11 +76,11 @@ def _check_singly_linked_als(board: Board,
     for cell in als_combination[0] + als_combination[1]:
         for candidate in cell.candidates:
             if candidate == rcc:
-                indicator_candidates.append((cell.x, cell.y, candidate, IndicatorLevel.ALTERNATIVE))
+                indicator_candidates.append(HighlightedPosition(cell.x, cell.y, candidate, IndicatorLevel.ALTERNATIVE))
             elif candidate == other_common_candidate:
-                indicator_candidates.append((cell.x, cell.y, candidate, IndicatorLevel.LAST))
+                indicator_candidates.append(HighlightedPosition(cell.x, cell.y, candidate, IndicatorLevel.LAST))
             else:
-                indicator_candidates.append((cell.x, cell.y, candidate, IndicatorLevel.DEFAULT))
+                indicator_candidates.append(HighlightedPosition(cell.x, cell.y, candidate, IndicatorLevel.DEFAULT))
 
     singly_linked_als = CommonPreview(invalidated_cells=invalidated_cells,
                                       indicator_candidates=tuple(indicator_candidates))
@@ -111,9 +111,12 @@ def _check_doubly_linked_als(board: Board,
         for cell in als_combination[0] + als_combination[1]:
             for candidate in cell.candidates:
                 if candidate in rcc:
-                    indicator_candidates.append((cell.x, cell.y, candidate, IndicatorLevel.ALTERNATIVE))
+                    indicator_candidates.append(HighlightedPosition(x=cell.x,
+                                                                    y=cell.y,
+                                                                    value=candidate,
+                                                                    indicator_level=IndicatorLevel.ALTERNATIVE))
                 else:
-                    indicator_candidates.append((cell.x, cell.y, candidate, IndicatorLevel.DEFAULT))
+                    indicator_candidates.append(HighlightedPosition(cell.x, cell.y, candidate, IndicatorLevel.DEFAULT))
 
         doubly_linked_als = CommonPreview(invalidated_cells=invalidated_cells,
                                           indicator_candidates=tuple(indicator_candidates))

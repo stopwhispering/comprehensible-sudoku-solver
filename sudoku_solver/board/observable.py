@@ -1,39 +1,40 @@
 from __future__ import annotations
 from typing import TYPE_CHECKING
 
+from sudoku_solver.shared.puzzle import ValuePosition
+
 if TYPE_CHECKING:
     from sudoku_solver.shared.preview import Preview
 
 
 class SudokuObservable:
     def __init__(self):
-        self.observers_finishing_value = []
-        self.observers_invalidating_candidate = []
+        self.observers_finished_values = []
+        self.observers_invalidated_candidates = []
+        self.observers_previews = []
 
-        self.observers_preview = []
+    def subscribe_to_finished_values(self, observer: callable):
+        if observer not in self.observers_finished_values:
+            self.observers_finished_values.append(observer)
 
-    def observe_finishing_value(self, observer: callable):
-        if observer not in self.observers_finishing_value:
-            self.observers_finishing_value.append(observer)
+    def subscribe_to_invalidated_candidates(self, observer: callable):
+        if observer not in self.observers_invalidated_candidates:
+            self.observers_invalidated_candidates.append(observer)
 
-    def observe_invalidating_candidate(self, observer: callable):
-        if observer not in self.observers_invalidating_candidate:
-            self.observers_invalidating_candidate.append(observer)
-
-    def subscribe_preview(self, observer_preview: callable):
+    def subscribe_to_previews(self, observer_preview: callable):
         """subscribe to receive preview objects of type Preview to indicate pattern; they include
-         execute() fn"""
-        if observer_preview not in self.observers_preview:
-            self.observers_preview.append(observer_preview)
+         an execute-function that actually executes finishing/invalidating of candidates"""
+        if observer_preview not in self.observers_previews:
+            self.observers_previews.append(observer_preview)
 
-    def notify_finishing_value(self, y: int, x: int, value: int):
-        for observer in self.observers_finishing_value:
-            observer(y, x, value)
+    def notify_solved_value(self, solved_value_position: ValuePosition):
+        for observer in self.observers_finished_values:
+            observer(solved_value_position)
 
-    def notify_invalidating_candidate(self, y: int, x: int, invalidated_value: int):
-        for observer in self.observers_invalidating_candidate:
-            observer(y, x, invalidated_value)
+    def notify_invalidated_candidate(self, invalidated_candidate_position: ValuePosition):
+        for observer in self.observers_invalidated_candidates:
+            observer(invalidated_candidate_position=invalidated_candidate_position)
 
     def notify_preview(self, preview: Preview):
-        for observer in self.observers_preview:
+        for observer in self.observers_previews:
             observer(preview)

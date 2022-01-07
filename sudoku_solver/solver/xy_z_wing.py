@@ -1,7 +1,7 @@
 import itertools
 
 from sudoku_solver.board.board import Board
-from sudoku_solver.shared.preview import IndicatorLevel, CommonPreview
+from sudoku_solver.shared.preview import IndicatorLevel, CommonPreview, HighlightedPosition
 from sudoku_solver.solver.decorators import evaluate_algorithm
 
 
@@ -41,12 +41,16 @@ def find_xy_wing(board: Board):
             if seen_by_pincers:
                 invalidated_cells = [(cell, candidate_z) for cell in seen_by_pincers]
                 indicator_candidates = (
-                    (pivot_cell.x, pivot_cell.y, candidate_x, IndicatorLevel.DEFAULT),
-                    (pivot_cell.x, pivot_cell.y, candidate_y, IndicatorLevel.DEFAULT),
-                    (pincer_combination[0].x, pincer_combination[0].y, candidate_x, IndicatorLevel.DEFAULT),
-                    (pincer_combination[0].x, pincer_combination[0].y, candidate_z, IndicatorLevel.ALTERNATIVE),
-                    (pincer_combination[1].x, pincer_combination[1].y, candidate_y, IndicatorLevel.DEFAULT),
-                    (pincer_combination[1].x, pincer_combination[1].y, candidate_z, IndicatorLevel.ALTERNATIVE),
+                    HighlightedPosition(pivot_cell.x, pivot_cell.y, candidate_x, IndicatorLevel.DEFAULT),
+                    HighlightedPosition(pivot_cell.x, pivot_cell.y, candidate_y, IndicatorLevel.DEFAULT),
+                    HighlightedPosition(pincer_combination[0].x, pincer_combination[0].y, candidate_x,
+                                        IndicatorLevel.DEFAULT),
+                    HighlightedPosition(pincer_combination[0].x, pincer_combination[0].y, candidate_z,
+                                        IndicatorLevel.ALTERNATIVE),
+                    HighlightedPosition(pincer_combination[1].x, pincer_combination[1].y, candidate_y,
+                                        IndicatorLevel.DEFAULT),
+                    HighlightedPosition(pincer_combination[1].x, pincer_combination[1].y, candidate_z,
+                                        IndicatorLevel.ALTERNATIVE),
                     )
                 xy_wing = CommonPreview(invalidated_cells=invalidated_cells,
                                         indicator_candidates=indicator_candidates)
@@ -92,15 +96,17 @@ def find_xyz_wing(board: Board):
                 if seen_by_all_three:
                     invalidated_cells = [(cell, candidate_z) for cell in seen_by_all_three]
                     indicator_candidates = (
-                        (pivot_cell.x, pivot_cell.y, candidate_x, IndicatorLevel.DEFAULT),
-                        (pivot_cell.x, pivot_cell.y, candidate_y, IndicatorLevel.DEFAULT),
-                        (pivot_cell.x, pivot_cell.y, candidate_z, IndicatorLevel.ALTERNATIVE),
-                        (pincer_combination[0].x, pincer_combination[0].y, candidate_x, IndicatorLevel.DEFAULT),
-                        (pincer_combination[0].x, pincer_combination[0].y, candidate_z,
-                         IndicatorLevel.ALTERNATIVE),
-                        (pincer_combination[1].x, pincer_combination[1].y, candidate_y, IndicatorLevel.DEFAULT),
-                        (pincer_combination[1].x, pincer_combination[1].y, candidate_z,
-                         IndicatorLevel.ALTERNATIVE),
+                        HighlightedPosition(pivot_cell.x, pivot_cell.y, candidate_x, IndicatorLevel.DEFAULT),
+                        HighlightedPosition(pivot_cell.x, pivot_cell.y, candidate_y, IndicatorLevel.DEFAULT),
+                        HighlightedPosition(pivot_cell.x, pivot_cell.y, candidate_z, IndicatorLevel.ALTERNATIVE),
+                        HighlightedPosition(pincer_combination[0].x, pincer_combination[0].y, candidate_x,
+                                            IndicatorLevel.DEFAULT),
+                        HighlightedPosition(pincer_combination[0].x, pincer_combination[0].y, candidate_z,
+                                            IndicatorLevel.ALTERNATIVE),
+                        HighlightedPosition(pincer_combination[1].x, pincer_combination[1].y, candidate_y,
+                                            IndicatorLevel.DEFAULT),
+                        HighlightedPosition(pincer_combination[1].x, pincer_combination[1].y, candidate_z,
+                                            IndicatorLevel.ALTERNATIVE),
                         )
                     xy_wing = CommonPreview(invalidated_cells=invalidated_cells,
                                             indicator_candidates=indicator_candidates)

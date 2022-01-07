@@ -12,6 +12,6 @@ def run_ui_loop(sudoku_ui: SudokuUI):
 
 def init_ui(prefilled_values: SudokuPuzzle) -> SudokuUI:
     tk = tkinter.Tk()
-    sudoku_ui = SudokuUI(tk)
+    sudoku_ui = SudokuUI(tk=tk)
     sudoku_ui.prefill_values(prefilled_values)
     return sudoku_ui

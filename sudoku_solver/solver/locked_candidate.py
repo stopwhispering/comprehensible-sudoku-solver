@@ -1,6 +1,6 @@
 from sudoku_solver.board.board import Board
 from sudoku_solver.board.houses import House, Block, Column, Row
-from sudoku_solver.shared.preview import CommonPreview, IndicatorLevel
+from sudoku_solver.shared.preview import CommonPreview, IndicatorLevel, HighlightedPosition
 from sudoku_solver.solver.decorators import evaluate_algorithm
 
 
@@ -30,7 +30,11 @@ def _find_locked_candidate_in_house(house: House) -> CommonPreview:
 
         if other_cells:
             invalidated_cells = [(cell, candidate) for cell in other_cells]
-            indicator_candidates = ((c.x, c.y, candidate, IndicatorLevel.DEFAULT) for c in cells_with_candidate)
+            indicator_candidates = (HighlightedPosition(x=c.x,
+                                                        y=c.y,
+                                                        value=candidate,
+                                                        indicator_level=IndicatorLevel.DEFAULT)
+                                    for c in cells_with_candidate)
             locked_candidate = CommonPreview(invalidated_cells=invalidated_cells,
                                              indicator_candidates=tuple(indicator_candidates))
             return locked_candidate
